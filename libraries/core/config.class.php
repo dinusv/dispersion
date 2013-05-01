@@ -428,9 +428,9 @@ class Config{
 	public function getModelFor( $model_name ){
 		if ( isset( self::$models[$model_name] ) )
 			if ( self::$models[$model_name] !== '' )
-				return self::$models[$model_name];
+				return self::$models[$model_name] . 'Model';
 			else return 'Model';
-		else return strtolower( $model_name );
+		else return strtolower( $model_name ) . 'Model';
 	}
 	
 	/** Error settings

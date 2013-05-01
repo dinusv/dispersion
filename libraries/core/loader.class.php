@@ -178,8 +178,11 @@ class Loader {
 			  && !file_exists( $this->locations['controllers'] . DS . strtolower($controller_suf) . '.php' ) ){
 				throw new PageNotFoundException();
 			}
-			$tpl_instance = Template::getInstance( 
-				new $model_name( $this->config->getDbSettings() ),
+			$db_settings   = $this->config->getDbSettings();
+			$db_connection = 'DatabaseConnection' . ucfirst( $db_settings['driver'] );
+			
+			$tpl_instance  = Template::getInstance( 
+				new $model_name( new $db_connection($this->config->getDbSettings()) ),
 				self::$debug,
 				$this->locations,
 				$this->config->autoloadSettings()

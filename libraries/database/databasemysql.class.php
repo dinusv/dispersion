@@ -17,14 +17,14 @@
  * @version     : 1.0
  */
  
-class DataBaseMySql extends Database {
+class DataBaseMySql extends Dispersion{
 	
 	private
 		/** Connection to the mysql server
 		 * 
 		 * @var resource
 		 */
-		$connection = null,
+		$_connection = null,
 		
 		/** Debug tables
 		 * 
@@ -54,30 +54,19 @@ class DataBaseMySql extends Database {
 	 * 
 	 * @param boolean $debug : true if table debugging is enabled
 	 */
-	public function DataBaseMySql( $debug ){
+	public function DataBaseMySql( $db_connection ){
 		parent::__construct();
-		$this->defaultDebug = $debug;
+		$this->nr_queries   = 0;
+		$this->last_result  = null;
+		$this->defaultDebug = $db_connection->debugQueries();
+		$this->_connection  = $db_connection;
 	}
 	
-	/** Connect to mysql database 
-	 * 
-	 * @override
-	 * 
-	 * @param string $base   : the database to connect to
-	 * @param string $server : the server name
-	 * @param string $user   : user for the database
-	 * @param string $pass   : password for the database
+	/**
+	 * @return used database connection
 	 */
-	public function connect( $base, $server, $user, $pass ){
-		$this->nr_queries = 0;
-		$this->last_result = null;
-		if ( !$this->connection ){
-			$this->connection = mysql_connect( $server, $user, $pass );
-			if ( !$this->connection )
-				Error::trigger( E_USER_ERROR, mysql_error() );
-			if ( !mysql_select_db( $base ) ) 
-				Error::trigger( E_USER_ERROR, 'Can\'t use the database : ' . mysql_error() );
-		}
+	public function connection(){
+		return $this->_connection;
 	}
 	
 	/* 

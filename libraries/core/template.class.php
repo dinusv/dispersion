@@ -96,7 +96,8 @@ class Template extends Dispersion{
 			$locations['libraries'] . DS . 'optional',
 			$locations['libraries_custom'],
 			$locations['libraries'] . DS . 'helpers',
-			$locations['helpers_custom']
+			$locations['helpers_custom'],
+			$locations['models']
 		);
 		$this->loaded_libs = $libraries;
 		/* set the view file location */

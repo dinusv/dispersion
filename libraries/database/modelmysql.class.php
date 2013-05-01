@@ -39,10 +39,10 @@ class Model extends DataBaseMySql {
 	 * 
 	 * @param array $db : db connection information
 	 */
-	public function Model( $db_settings ) {
-		parent::__construct( $db_settings['debug_queries'] );
-		$this->connect( $db_settings['database'], $db_settings['host'], $db_settings['user'], $db_settings['password'] );
-		$this->table = strtolower(get_class($this));
+	public function Model( $db_connection ) {
+		parent::__construct( $db_connection );
+		$class_name  = strtolower(get_class($this));
+		$this->table = substr( $class_name, 0, strlen( $class_name ) - 5 );
 	}
 	
 	/* 
@@ -65,9 +65,9 @@ class Model extends DataBaseMySql {
 	 */
 	public function getPrimaryKey(){
 		if ( $this->_primary_key === null ){
-			$result = $this->model->query("show index from `" . $this->table . "` where Key_name = 'PRIMARY'");
-			if ( $this->model->numRows( $result ) > 0 ){
-				$row = $this->model->nextObject($result);
+			$result = $this->query("show index from `" . $this->table . "` where Key_name = 'PRIMARY'");
+			if ( $this->numRows( $result ) > 0 ){
+				$row = $this->nextObject($result);
 				$this->_primary_key = $row->Column_name;
 				return $this->_primary_key;
 			} else $this->error->displayAndDie("This table has no primary key to select upon.", "sql error");
