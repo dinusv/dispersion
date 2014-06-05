@@ -44,6 +44,8 @@ Welcome to the homepage.
 This is the home controller, you can edit this file in "application/controllers" directory. 
 ```
 
+If the message appears, the framework is up and running and you are ready to start developing.
+
 ## Documentation
 
 A start-up tutorial, together with the rest of the API is available at [http://dispersion.dinusv.com/documentation](http://dispersion.dinusv.com/documentation).
