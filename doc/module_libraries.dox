@@ -1,0 +1,13 @@
+/**
+ * @defgroup libraries Libraries
+ * @brief Optional components
+ * 
+ * Classes found within this module are not loaded in by the framework by default. However,
+ * you can choose within your configuration file if you would like to auto-load one or more
+ * of these components. Libraries can be of 2 types : 
+ *  - Libraries that extend the Dispersion class
+ *  - Libraries that don't
+ * The ones that extend the dispersion class have access to all the applications resources.
+ * For example, the Session class has access to the database in order to manage users logging
+ * in and out.
+ */

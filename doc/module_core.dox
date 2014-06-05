@@ -1,0 +1,8 @@
+/**
+ * @defgroup core Core
+ * @brief Main framework classes.
+ 
+ * All classes are instantiated within each loaded page of a website and deal with lots of issues 
+ * like url-routing, class-autoloading, error checking and management, debug handling, 
+ * view-file organization.
+ */

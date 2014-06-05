@@ -1,0 +1,11 @@
+/**
+ * @defgroup helpers Helpers
+ * @brief Optional small components / wrappers
+ * 
+ * Helpers are smaller classes that handle specific tasks, or provide wrappers
+ * for other components. The main difference between a library and a helper is
+ * that a library will offer functionality regarding a subject, and most of the
+ * time, a single instance of the library will be enough in order to solve a 
+ * specific problem, while in the case of helpers, multiple instances can be used,
+ * in some cases forming complex ierarchies. 
+ */

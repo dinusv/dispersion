@@ -1,0 +1,165 @@
+/**
+@page qs_adding_messages Adding Messages
+
+In the [previous chapter](@ref qs_layouts_and_styling), view files were set up to accept messages, and display
+them by the following code :
+
+@code
+<?php if ( isset( $message ) ){ ?>
+    <section <?php if ( isset( $message_type ) ) echo 'class="' . $message_type . '"';?> id="message">
+        <?php echo $message;?>
+    </section>
+<?php } ?>
+@endcode 
+
+This means that by setting the message variable in the controlle, the view files will automatically display it.
+To test this, add the following code to one of the books controller methods and visit the page in order to see
+if the view files display it :
+
+@code
+$this->set( 'message', 'Hello' );
+@endcode
+
+## Seding messages over pages
+
+In [adding and editing](@ref qs_adding_and_editing], caught exceptions for fields that weren't filled properly
+would be simply echoed out. They were also displayed in the page the form was submitted to, making the user
+manually return to the form. Redirecting the user would cause messages to be lost. Using php's sessions would
+require manual deletion of messages received from previous pages. A class that already handles that is called
+Flash. The Flash class is used in order to store temporary information. Within it's constructor, it counts 
+page requests and deletes expired messages. This means that in order to count the exact number of pages the
+user visits, this type of object needs to be created within each page request. Automatically it can be 
+set within the main configuration file at this point :
+
+@code
+Config::autoload('libraries', array() );
+@endcode
+
+All libraries added within this array are autoloaded and made available throughout the application. All 
+autoloaded libraries are classes that have an instance created and visible within the controller, model and
+view files of the web application. Within this context, the flash library needs to be added :
+
+@code
+Config::autoload('libraries', array('flash') );
+@endcode
+
+Within either the controller, model or view file, the classe's created instance can be accessed using 
+`$this->flash`. The flash library has 2 methods of interest for now. The `set()` method and the `get()` 
+method. The `set()` method takes 3 arguments : the kwy the value will be refered to, the actual value, 
+and an optional third argument that takes the number of page requests the information will be available 
+for. If the third argument is missing, the page will be available only until the next request, which in
+our case, is just enough to send the error messages. The `get()` method requires only the key the value
+was set at, and returns the value if it's found, or null otherwise.
+
+With the above in mind, below is the code tat displays the error message :
+
+@code
+<?php
+class BooksController extends Controller {
+    public function index() {
+        $message = $this->flash->get('message');
+        $message_type = $this->flash->get('message_type');
+        if( $message )
+            $this->set('message', $message);
+        if( $message_type )
+            $this->set('message_type', $message_type);
+        $this->insertView('books_view');
+        $result = $this->model->select();
+        $this->set('result', $result);
+    }
+ 
+    public function add() {
+        $message = $this->flash->get('message');
+        $message_type = $this->flash->get('message_type');
+        if( $message )
+            $this->set('message', $message);
+        if( $message_type )
+            $this->set('message_type', $message_type);
+        $this->insertView('books_add');
+    }
+ 
+    public function save() {
+        try {
+            $fv = new FormValidation();
+            $this->model->insert(array(
+                'title' =>
+                    $fv->field('title')->required()->minLength(5)->maxLength(255)->trim()->toentities()->getValue(),
+                'author' =>
+                    $fv->field('author')->required()->maxLength(127)->trim()->toentities()->getValue(),
+                'description' =>
+                    $fv->field('description')->toentities()->getValue,
+                'year' =>
+                    $fv->field('year')->minLength(3)->maxLength(5)->toentities()->getValue(),
+                'added_on' =>
+                    date('Y-m-d')
+            ));
+            $this->flash->set('message', 'Book saved succesfully.');
+            $this->url->linkTo('books')->redirect();
+        } catch( InvalidFieldException $e ) {
+            $this->flash->set('message', "<b>" . $e->getFieldName() . " : </b>" . $e->getMessage());
+            $this->flash->set('message_type', 'error');
+            $this->url->linkTo('books', 'add')->redirect();
+        }
+    }
+ 
+    public function edit($id = null) {
+        if( $id === null )
+            $this->url->linkTo('books')->redirect();
+        $this->url->linkTo('books')->redirect();
+        $row = $this->model->selectRow($id);
+        if( !$row )
+            $this->url->linkTo('books')->redirect();
+        $message = $this->flash->get('message');
+        $message_type = $this->flash->get('message_type');
+        if( $message )
+            $this->set('message', $message);
+        if( $message_type )
+            $this->set('message_type', $message_type);
+        $this->set('row', $row);
+        $this->insertView('books_edit');
+    }
+ 
+    public function update($id = null) {
+        if( $id === null )
+            $this->url->linkTo('books')->redirect();
+        if( !$this->model->selectRow($id) )
+            $this->url->linkTo('books')->redirect();
+        try {
+            $fv = new FormValidation();
+            $this->model->updateRow(array(
+                'title' =>
+                    $fv->field('title')->required()->minLength(5)->maxLength(255)->trim()->toentities()->getValue(),
+                'author' =>
+                    $fv->field('author')->required()->maxLength(127)->trim()->toentities()->getValue(),
+                'description' =>
+                    $fv->field('description')->toentities()->getValue,
+                'year' =>
+                    $fv->field('year')->minLength(3)->maxLength(5)->toentities()->getValue(),
+                'added_on' =>
+                    date('Y-m-d')
+            ), $id);
+            $this->flash->set('message', 'Book updated succesfully.');
+            $this->url->linkTo('books')->redirect();
+        } catch( InvalidFieldException $e ) {
+            $this->flash->set('message', "<b>" . $e->getFieldName() . " : </b>" . $e->getMessage());
+            $this->flash->set('message_type', 'error');
+            $this->url->linkTo('books', 'update', $id)->redirect();
+        }
+    }
+ 
+    public function delete($id = null) {
+        if( $id === null )
+            $this->url->linkTo('books')->redirect();
+        $this->model->deleteRow($id);
+        $this->flash->set('message', 'Book deleted.');
+        $this->url->linkTo('books')->redirect();
+    }
+ 
+}
+@endcode
+ 
+You can notice the `message_type` has been set as well in order to display the message as an error or notification.
+
+The next chapter looks into [uploading images](@ref qs_uploading_images).
+
+*/

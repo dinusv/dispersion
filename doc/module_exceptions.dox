@@ -1,0 +1,9 @@
+/**
+ * @defgroup exceptions Exceptions
+ * @brief Framework exceptions
+ * 
+ * Exceptions can have a variety of usses. Dispersion uses these internally either to
+ * indicate logic errors or to interrupt a sequence in order to signal an event. The 
+ * PageNotFoundException for example eases url-checking within the controller of a
+ * web application. 
+ */

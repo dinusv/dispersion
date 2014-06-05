@@ -1,0 +1,190 @@
+/**
+@page configuration_main Main Configuration
+
+Dispersion has 2 configuration files by default. More configuration files can be added either by creating 
+new libraries that might require them, or by customizing the behavior of the framework. The files can be
+found in the 'application/config' folder of your application. 'config.php' deals with the main configuration
+of the framework, while 'errors.php' deal with errors and exception handling. This section covers 'config.php'
+file.
+
+## Database Settings
+
+After installation the database settings are the only ones required in order for the framework to work. They 
+are 5 in total:
+
+@code
+Config::db( 'driver', 'mysql' );
+@endcode
+
+The database driver to be used. Currently the framework supports only mysql, other options will be available 
+soon.
+
+@code
+Config::db( 'database', '' );
+@endcode
+
+The database you will be using for your application. 
+
+@code
+Config::db( 'host', '' );
+@endcode
+
+Name of the host for the database. In most cases, this is usually localhost.
+
+@code
+Config::db( 'user', '' );
+Config::db( 'password', '' );
+@endcode
+
+The user who will be using the database, and the password. Leave the password field empty if no password is 
+required.
+
+## Urls
+
+@code
+Config::baseurl('');
+@endcode
+
+The url where your application is located. This will become useful when you will need to migrate your site 
+to another domain and won't have to replace every link. To retrieve the baseurl from your application you 
+can use either the global constant BASEPATH, or the Url::base method from the Url class. The Url class has 
+other methods that use the baseurl as well.
+
+@code
+// Example
+Config::baseurl('http://localhost/');
+ 
+// In your application
+echo BASEURL; // http://localhost/
+echo $this->url->base(); // http://localhost/
+echo $this->url->linkTo('apples', 'green'); // http://localhost/apples/green
+@endcode
+
+Custom urls can be added as well in the configuration file. They are saved by their id. You can access them
+in your application by using the Url class. Here's an example :
+
+@code
+// Example
+Config::url( 'images', 'http://localhost/images' );
+Config::url( 'script', 'http://localhost/script' );
+ 
+// In your application
+echo $this->url->custom['images'] // http://localhost/images
+echo $this->url->custom['script'] // http://localhost/script
+@endcode
+
+## Timezone
+
+In recent versions of php, setting the timezone is required when working with the date and time. If the timezone
+isn't set, php will signal a warning. It's why we added this feature to the configuration. A list of available 
+timezones can be found <a href="http://php.net/manual/en/timezones.php">here</a>.
+
+@code
+Config::timezone('');
+@endcode
+
+## Default Controller
+
+@code
+Config::autoload( 'defaultcontroller', 'home' );
+@endcode
+
+The default controller is the controller which will be triggered when only the base url is given. In the above
+example, going to 'http://localhost/' will trigger the index() method from the HomeController. 
+
+## Layout
+
+@code
+Config::autoload( 'viewfiles', array( 0 ) );
+@endcode
+
+View files are the files that display information received from the controller. They are located in the 
+'application/views' directory. Each controller can specify which view files to load. In most applications,
+some view files are used globally in order to create a layout ( header, sidebar, footer or other components ).
+To not load these files manually in each method of the controller, the layout created in the configuration file
+can be used globally throughout the website. Layouts are created by specifying the view files that will be
+autoloaded throughout the application and the locations which custom view files will be added. These locations
+are represented by consecutive numbers, and view files are represented by their relative path to 
+'application/views' directory. The numbers must be consecutive, starting from zero, otherwise you might
+receive an IndexOutOfBoundsException in your application. You can add more numbers if you think they will
+be needed, if you don't use them the framework will ignore them. For the example below, 3 numbers were 
+added in case more view files will be required in that position.
+
+@code
+// Autoload header, sidebar and footer
+Config::autoload( 'viewfiles', array( 'header', 0, 1, 2, 'sidebar', 3, 'footer' );
+ 
+// In your application, you can add content to the template:
+$this->insertView( 'mainsection' ); // will load 'mainsection.php' in the zero position, after 'header.php'
+$this->insertView( 'newssection' ); // will load 'newssection.php' in the '1' position, after 'mainsection.php'
+// We can add the position the file will be loaded to, in this case, it will load it after 'sidebar.php'
+$this->insertView( 'ads', 3 );
+@endcode
+
+The above example will load header.php, mainsection.php, newssection.php, sidebar.php, ads.php, footer.php. 
+If you work with a lot of view files for one page, it's a good practice to use the index constant. The 
+layout can also be disabled for custom pages.
+
+## Libraries
+
+Optional libraries that are used throughout the framework can be autoloaded as well. Some of the libraries
+work better this way, like the Session class, or the Flash class which make use of their initialization 
+in order to keep track of data.
+
+@code
+// Example
+Config::autoload('libraries', array('session', 'flash') );
+@endcode
+
+## Models
+
+By default, each controller requires a model with the same name, and each model must have the same name as
+the table it's representing in the database. To map a controller to another model, or to disable a model 
+for the controller, the following settings can be used :
+
+@code
+// Map the HomeController to the Global model.
+Config::models( 'home', 'glob' );
+ 
+// Disable the model
+Config::disablemodels( array('home') );
+// Another way to disable models
+Config::models( 'home', '' );
+@endcode
+
+Controllers don't require separate models in order to connect to the database. If a model is disabled for
+a controller, the controller can use the default model provided by the framework.
+
+
+## Routing
+
+The standard way the framework handles a route is '/controller/action/parameter1/parameter2/parameter3'. 
+You can change that by adding new routes to the config class. A route is added by specifying a string to 
+match the url in the browser, and an array of strings containing the controller, action, and parameters to
+activate when the matched url is found. You can use the symbol '[*]' to match any number of parameters in 
+the url.
+
+The code below will match routes like 'home/photos/albums', 'home/music/categories' and send it to 'mycollections' 
+controller, 'get' method, with parameters 'photos', 'albums' or 'music', 'categories'
+
+@code
+Config::addRoute( 'home/[*]', array('mycollections', 'get', '[*] ) );
+@endcode
+
+The number of parameters can also be limited :
+
+@code
+// Minimum 2 
+Config::addRoute( 'home/[*>2]', array('mycollections', 'get', '[*] ) );
+
+// Maximum 2
+Config::addRoute( 'home/[*<2]', array('mycollections', 'get', '[*] ) );
+
+//Exactly 2
+Config::addRoute( 'home/[*2]', array('mycollections', 'get', '[*] ) );
+
+//Between 2 and 5
+Config::addRoute( 'home/[*>2]/[*<5]', array('mycollections', 'get', '[*] ) );
+@endcode
+
+*/

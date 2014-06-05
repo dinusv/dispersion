@@ -1,0 +1,41 @@
+/**
+@page qs_configuration Configuration
+
+## Installation
+
+To install Dispersion, just download the most recent version from github and 
+extract the archive to your webserver. By default, the homepage is available, but 
+that will work only after you make some changes to the configuration file.
+
+## Configuration
+In order for our homepage to work, we need to configure the database settings. In
+ your framework folder, go to application/config/config.php, and set up the following settings :
+
+@code
+
+Config::db( 'driver',   'mysql' ); // database you will be using
+Config::db( 'database', '' );  //the database you will use
+Config::db( 'host',     '' );  //the database host, usually this is set to localhost
+Config::db( 'user',     '' );  //the user of the database
+Config::db( 'password', '' );  //password for the user
+
+@endcode
+For any other changes in your configuration file you can find a complete guide 
+[here](@ref configuration_main).
+
+So, now that these settings have been set properly, you can test to see if the installation 
+went through successfully by going to the location you installed the framework at,  with your 
+webbrowser. You should see the following message :
+ 
+______
+Welcome to the homepage\n
+This is the home controller, you can edit this file in "application/controllers" directory.
+______
+
+If you do not see the message, or if you have received an error, please check to see if you have
+made all of the above changes correctly or if your server is running properly.\n
+
+The next section deals with creating the first [application](@ref qs_first_application)
+
+
+*/

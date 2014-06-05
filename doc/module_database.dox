@@ -1,0 +1,10 @@
+/**
+ * @defgroup database Database
+ * @brief Data access module
+ * 
+ * Specifically, components found within this layer can access database tables and
+ * manipulate data. Access is done through components called 'drivers', and data
+ * mapping is done through components called 'models'. Within a web application,
+ * each database table can map to a model that provides easy access to some of the
+ * most commmon operations : select, insert, update, delete.
+ */

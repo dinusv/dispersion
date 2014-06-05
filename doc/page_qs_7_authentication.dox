@@ -1,0 +1,270 @@
+/**
+@page qs_authentication User Authentication
+
+In this chapter we will secure the application by limiting access to the bokos collection to registered 
+users. We will start by creating a table to store the users in, adding a suer, and generating a password
+for the user that will be used to login to the application. Then the session class will be used to automate
+the login process.
+
+## Creating the table
+
+The following fields are neeeded : user account name, password and the last time the user logged in :
+
+@code
+CREATE TABLE users (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+    `name` VARCHAR( 128 ) NOT NULL ,
+    `password` VARCHAR( 128 ) NOT NULL ,
+    last_login DATETIME NOT NULL
+}
+@endcode
+
+## Working with the Session class
+
+The session class is an optional library that handles the whole user login process. All it needs is
+some starting configuration options. The configuration is made through extending this class and overriding
+it's fields and methods. This way extra functionality can easily be added. To extend the class, go to 
+application/libraries and create a new file, and name it usersession.php, and in the file create the 
+usersession class that extends the session class. There are 3 configuration fields that need overriding :
+ - `$_table name` of the table the users will be stored in
+ - `$_table_column` an array of key-value pairs, where the keys represent any predefined fields that won't 
+be stored 'as is', and the values represent the table column name with which that predefined key is 
+associated. For example, in our users table, we have the password field which will need encryption, and this
+is how the session class is made aware of that
+ - `$_session_keys` an array of key-value pairs, where the keys are the table column names, and the values 
+will be the session keys to store the table fields at. For example, in the users table, if we map the 
+column 'name' with the key 'username', we will then be able to access each current users name in 
+`$_SESSION['username']`
+
+Taking the above mentioned into account, the `usersession` class has the following structure :
+
+@code
+<?php
+class UserSession extends Session{
+     
+    protected
+        $_table = 'users',
+        $_table_column = array(
+            Session::PASSWORD_FIELD => 'password',
+            Session::LASTUSED_FIELD => 'last_login'
+        ),
+        $_session_keys = array(
+            'id' => 'id',
+            'name' => 'username'
+        );
+         
+}
+@endcode
+
+In the `$_table_column` the library now knows that the 'password' field from the users table will hold a 
+password-type value, so it will need encryption, and the `last_login` is a datetime type field that will
+automatically be updated when the user logs in.
+
+## Password Encryption
+
+By default, the Session library encrypts the password using the blowfish algorithm. The blowfish algorithm 
+has been added in php version 5.3.0, so in case you have an older version of php, you will need to go with 
+a different encryption method. To do that, you need to override the session method generatePass() in your 
+`usersession` class. Here's a simple example on how to override the encryption method using the md5 function :
+
+@code
+<?php
+class UserSession extends Session{
+ 
+    protected /*...*/
+ 
+    public function generatePass( $password, $salt = null ){
+        return md5($password);
+    }
+     
+}
+@endcode
+
+## Creating the Login
+
+From now on, the usersession clas will be used constantly, so it should therefore be always loaded. Go to 
+'application/config/config.php', and add the library to the autoload libraries function : 
+
+@code
+Config::autoload('libraries', array( 'flash', 'usersession' ) );
+@endcode
+
+Next, we will create the user controller that will handle the log in and log out. In 'application/control',
+create a file, 'usercontroller.php', and add the following :
+
+@code
+<?php
+class UserController extends Controller {
+ 
+    function index() {
+        $this->url->linkTo('user', 'login')->redirect();
+    }
+ 
+    function login() {
+        if( $this->usersession->checkSession() )
+            $this->url->linkTo('books')->redirect();
+        if( isset($_POST['username']) && isset($_POST['password']) ) {
+            if( $this->usersession->newSession(array(
+                'name' => $_POST['username'],
+                'password' => $_POST['password']))
+            ) {
+                $this->flash->set('message', 'Logged in succesfully.');
+                $this->url->linkTo('books')->redirect();
+            } else {
+                $this->set('message', 'Wrong username/password.');
+                $this->set('message_type', 'error');
+            }
+        }
+        $this->insertView('login');
+    }
+ 
+    function logout() {
+        $this->usersession->endSession();
+        if( !$this->usersession->checkSession() )
+            $this->url->linkTo('user', 'login')->redirect();
+    }
+ 
+}
+@endcode
+
+The `index()` method redirects the user to the login page. On the login page, the first thing to do is check
+if the user isn't already siggned in. The `checkSession()` method will return true if there is an active 
+user session, and false otherwise. If no one is signed in, the method checks if there was a form submitted,
+and then sends the data to the newSession() method, which takes an array of key-value pairs, where the keys
+are the column name, and the values are the column's value. Two fields are checked ('user' and 'password' )
+and if the value is found, the session is automatically created, and the user redirected to the books page. 
+Otherwise the login form is shown. The login form is located in 'application/views/login.php' :
+
+@code
+<h2>Login</h2>
+<form method="post" action="<?php echo $this->url->base();?>user/login">
+    <p>
+        <label for="title">Username : </label>
+        <input id="title" type="text" name="username"/>
+    </p>
+    <p>
+        <label for="author">Password : </label>
+        <input id="author" type="text" name="password"/>
+    </p>
+    <p>
+        <input type="submit" value="Login"/>
+    </p>
+</form>
+@endcode
+
+A model is not needed since most of the operations are done through the session class, so we should disable
+it within the configuration file :
+
+@code
+Config::disablemodels( array('user') );
+@endcode
+
+## Login Check
+
+Instead of having to check in each method if the user is logged in, we can extend the `before()` method 
+from the main controller, which is a hook called before any other method in our current controller. 
+This is how our before() method will look like :
+
+@code
+<?php
+class BooksController extends Controller {
+ 
+    protected function before() {
+        if( !$this->usersession->checkSession() )
+            $this->url->linkTo('user', 'login')->redirect();
+    }
+ 
+    public function index() { /*...*/ }
+ 
+    public function add() { /*...*/ }
+ 
+    public function save() { /*...*/ }
+ 
+    public function edit($id = null) { /*...*/ }
+ 
+    public function update($id = null) { /*...*/ }
+ 
+    public function delete($id = null) { /*...*/ }
+ 
+    public function deleteimage($id = null) { /*...*/ }
+ 
+}
+@endcode
+
+A link to the logout function will also be needed. We will add that in the header with the other links. So,
+the file 'application/views/header.php' will be:
+
+@code
+<html>
+    <head>
+        <title><?php if( isset($title) ) echo $title; else echo 'My Books'; ?></title>
+        <link rel="stylesheet" type="text/css" href="<?php echo $this->url->base();?>public/css/style.css" />
+    </head>
+    <body>
+        <div id="wrapper">
+            <header>
+                <h1>My Books</h1>
+                <div id="add-new-book">
+                    <a href="<?php echo $this->url->linkTo('books');?>">View Books</a>
+                    <a href="<?php echo $this->url->linkTo('books', 'add');?>" >Add New Book</a>
+                    <?php if ( $this->usersession->checkSession() ){ ?>
+                        <a href="<?php echo $this->url->linkTo('user', 'logout');?>">Logout</a>
+                    <?php }?>
+                </div>
+            </header>
+            <?php if ( isset( $message ) ){ ?>
+                <section <?php if( isset($message_type) ) echo 'class="' . $message_type . '"'; ?> id="message">
+                    <?php echo $message;?>
+                </section>
+            <?php }?>
+            <section id="content">
+@endcode
+
+## Adding a user
+
+To add the user to the table, we need to generate the password first. Let's create a method in the user 
+controller that will generate the password and automatically insert the user for us:
+
+@code
+<?php
+ 
+class UserController extends Controller {
+ 
+    function index() {
+        $this->url->linkTo('user', 'login')->redirect();
+    }
+ 
+    function login() {
+        if( $this->usersession->checkSession() )
+            $this->url->linkTo('books')->redirect();
+        if( isset($_POST['username']) && isset($_POST['password']) ) {
+            if( $this->usersession->newSession(array('name' => $_POST['username'], 'password' => $_POST['password'])) ) {
+                $this->flash->set('message', 'Logged in succesfully.');
+                $this->url->linkTo('books')->redirect();
+            } else {
+                $this->set('message', 'Wrong username/password.');
+                $this->set('message_type', 'error');
+            }
+        }
+        $this->insertView('login');
+    }
+ 
+    function logout() {
+        $this->usersession->endSession();
+        if( !$this->usersession->checkSession() )
+            $this->url->linkTo('user', 'login')->redirect();
+    }
+ 
+    function addnewuser() {
+        $pass = 'password';
+        $this->set('message', $this->usersession->generatePass($pass));
+    }
+ 
+}
+@endcode
+
+The $pass variable will store the unencrypted password. The encrypted one will be generated with 
+Session::generatePass. After adding the user with the encrypted password to the database, you can delete
+the `addnewuser()` method from the controller.
+
+*/

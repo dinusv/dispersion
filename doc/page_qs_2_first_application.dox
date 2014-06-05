@@ -1,0 +1,236 @@
+/**
+@page qs_first_application First Application
+
+Dispersion works on the MVC principle. That means that each path you access has the following
+ syntax:\n
+/controller/action/parameter1/parameter2/... \n
+For example, presuming that Dispersion has been installed in a location pointed by http://localhost
+going to http://localhost/books/orderby/year will trigger the books controller, which is a 
+class, it's 'orderby' method, and the 'year' which will be sent as the methods parameter. The address
+is currently unavailable due to the controller missing, so the next section will deal with building
+the controller.
+
+## Creating the controller
+Go to your `application/control` folder, and create a new file, call it 'bookscontroller.php'. 
+Observe the ending of the file in 'controller'. We use this ending in order to differenciate the 
+models from the controllers. Models have the same name as the controller, and they, as well, 
+have the same name as the table they are representing in the database. But we are not going to 
+use a model in this example, so we are going to disable it in our configuration file, otherwise we 
+will receive an error. So, go to your `application/config/config.php` file, and look for the 
+following line of code :
+
+@code
+Config::disablemodels( array() );
+@endcode
+ 
+and add the 'books' model to be disabled, so we don't have to worry about connecting to the 
+database.
+
+@code
+Config::disablemodels( array('books') );
+@endcode
+
+Now, getting back to our controller, you've created a file in your `application/control` folder 
+named 'bookscontroller.php'.\n 
+Open the file in your editor, and let's write the 'orderby' function. As a starting point, write 
+down the class definition:
+
+@code
+<?php
+class BooksController extends Controller{
+     
+}
+@endcode
+
+After that, add the  'orderby' method :
+
+@code
+<?php
+class BooksController extends Controller{
+     
+    public function orderby(){
+    }
+     
+}
+@endcode
+
+Now, once we try and access the orderby method ( `http://localhost/books/orderby` ), we will 
+receive an empty page. That's because we haven't set up anything to show in our method. 
+Try and echo out something in our method and see if it works:
+
+@code
+<?php
+class BooksController extends Controller{
+     
+    public function orderby(){
+        echo 'You are here.';
+    }
+     
+}
+@endcode
+
+Now, if you refresh the page, the echoed text is displayed. This makes for the first test page of
+the application. The next stage will be creating a website that can manage a book collection stored
+ in a database.
+ 
+## Creating the database connection
+
+In order to store books in the database, we need to create a table to store the books into. The 
+'books' table will have the following fields :
+
+@code 
+    id => int, not null, primary, auto_increment
+    title => varchar(255),
+    author => varchar(127),
+    description => text,
+    year => varchar(4),
+    added_on => date
+@endcode
+
+and the following mysql code:
+
+@code
+CREATE  TABLE  books.books (
+   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+   title VARCHAR( 255 ) NOT NULL ,
+   author VARCHAR( 127 ) NOT NULL ,
+   description TEXT NOT NULL ,
+   `year` VARCHAR( 4 ) NOT NULL ,
+   added_on DATE NOT NULL
+) ENGINE  =  MYISAM
+@endcode
+
+Now, going back to our previous example where we created the books controller, we had to disable 
+the model from our configuration file. In order for the `BooksController` to work with the 'books'
+table the removal of that line is necessary.
+
+@code 
+Config::disablemodels( array() );
+@endcode
+
+Next, create the model by going to, 'application/models', create a file named 'books.php', and add the 
+following lines of code:
+
+@code
+<?php
+class Books extends Model{
+ 
+}
+@endcode
+
+By default, the Books model will automatically be associated with the books table in your database, 
+so there's no need to specify the table to be used.
+
+## Creating the index method
+
+In case the path of the url points just to the books controller ( `http://localhost/books` ) 
+the method named 'index' from your controller will be called by default. This is why each 
+controller should have an index method. The index page will be the main page of the books section,
+ so natural thing to do is display the whole book collection within that bage. To do that, we need
+ to select all the books from the table using the associated model. We can either write a method in
+ the extended model to select all the books, or use an existing one. Since the books model receives
+ all the functionality of it's parent `Model` class, we don't need to write an sql query to select
+ the books, since those types of queries are already made available. One of the quick selection 
+ methods in our model is the 'select()' method, which returns a result object to be processed later
+ on. Going back to the controller, the following line of code will select the whole books from the
+ database :
+ 
+@code 
+<?php
+class Books extends Model{
+         
+    public function index(){
+        $result = $this->model->select();
+    }
+     
+}
+@endcode
+
+In order to display them, view files are required.
+
+## View Files
+
+View files are used to separate the user interface from the websites functionality. In this case, 
+they are needed to display the results of the book collection. To create a view file, go to 
+`application/views` and create a file named `books_view.php`. In order to link your file to the
+`index()` method, you need to insert it to your template using the `insertView()` method, inherited
+from the controller.  
+
+@code
+<?php
+class Books extends Model{
+         
+    public function index(){
+        $this->insertView( 'books_view' );
+        $result = $this->model->select();
+    }
+     
+}
+@endcode
+
+One problem still remains. The result received from the `select()` method was 
+received localy in the index function. So, that will be lost once in the view file. That's why
+the `set()` method is used. It receives 2 parameters, one being the name of the variable that 
+will be available in the view file, and the other being it's value. In this case, and most
+recommended cases, we will keep the same name as the one in the controller :
+
+@code
+<?php
+class Books extends Model{
+         
+    public function index(){
+        $this->insertView( 'books_view' );
+        $result = $this->model->select();
+        $this->set( 'result', $result );
+    }
+     
+}
+@endcode
+
+Now the view file will have all the available data. Within that file, a global base 
+link to our website is needed, so if the site will be moved online or elsewhere, the view files won't need to
+be reedited to the new links. This type of link can be set using the main configuration file. Go to
+`application/config/config.php` and set the Config::baseurl() to your website address. For this
+example we will use localhost ( `http://localhost` ).
+
+@code
+Config::baseurl('http://localhost/');
+@endcode
+
+Now, in the view file we will be listing our entries in a table, together with a link to a page where
+we can edit them, and another link to a page where we will be deleting them. Go to 
+`application/views/books_view.php` and add the following code :
+
+@code 
+<html>
+    <head>
+        <title>My Books</title>
+    </head>
+    <body>
+        <h1>My Books</h1>
+        <table>
+            <?php while ( $row = $this->model->nextObject( $result ) ) { ?>
+                <tr>
+                    <td><?php echo $row->title;?></td>
+                    <td><?php echo $row->author;?></td>
+                    <td><?php echo $row->description;?></td>
+                    <td><?php echo $row->year;?></td>
+                    <td><?php echo $row->added_on;?></td>
+                    <td>
+                        <a href="<?php echo $this->url->base();?>books/edit/<?php echo $row->id;?>" >Edit</a>
+                        <a href="<?php echo $this->url->base();?>books/delete/<?php echo $row->id;?>" >Delete</a>
+                    </td>
+                </tr>
+            <?php } ?>
+    </table>
+</body>
+</html>
+@endcode
+
+Above we are parsing all the results with $this->model->nextObject( $result ) and adding them to the
+`$row` variable, which is used to output each column of the row. The method `$this->url->base()` 
+just retrieves the url we have configured earlier.
+
+In the next section we will cover adding and [editing content](@ref qs_adding_and_editing).
+
+*/

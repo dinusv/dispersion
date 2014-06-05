@@ -1,0 +1,194 @@
+/**
+@page qs_layouts_and_styling Layouts and Styling
+
+This chapter will mostly work with view files in order to style the application. The first problem is that 
+the view files repeat the same header and footer. A better choice would be to separate them in 2 files, and
+include them in each page. Including them would again cause duplicate code, although way less, plus it would
+add another responisbility to the view files, which can be directed elsewhere. To avoid the previous mentioned
+Dispersion works with a layout configuration option, which lets developers create a template to automatically
+load layout files within pages of the application. To use this option, go to the configuration file, 
+( application/config/config.php ), and look for the following line :
+
+@code
+Config::autoload( 'viewfiles', array( 0 ) );
+@endcode
+
+Notice the array containing the 0 character. The 0 indicates the place the view file will be loaded 
+when the insertView() method is used. It is bassically an index for the first inserted view file. More numbers
+can be added consecutively in order to load multiple view files, or another version is to add actual view
+files to be autoloaded. In this case, the configuration will look like :
+
+@code
+Config::autoload( 'viewfiles', array( 'header', 0, 'footer' ) );
+@endcode
+
+This makes Dispersion load the header and footer files automatically, and the '0' will insert a view
+file between the 'header' and 'footer'. If for example a custom sidebar was required, the array would
+look similar to `'header', 0, 1, 'footer'`. 
+ 
+## Creating the view files
+
+Here's the code for the view files :
+
+header.php
+
+@code
+<html>
+    <head>
+        <title><?php if ( isset( $title ) ) echo $title; else echo 'My Books';?></title>
+        <link rel="stylesheet" type="text/css" href="<?php echo $this->url->base();?>public/css/style.css" />
+    </head>
+    <body>
+        <div id="wrapper">
+            <header>
+                <h1>My Books</h1>
+                <div id="add-new-book">
+                    <a href="<?php echo $this->url->linkTo('books');?>">View Books</a>
+                    <a href="<?php echo $this->url->linkTo('books', 'add' );?>" >Add New Book</a>
+                </div>
+            </header>
+            <?php if ( isset( $message ) ){ ?>
+                <section <?php if ( isset( $message_type ) ) echo 'class="' . $message_type . '"';?> id="message">
+                    <?php echo $message;?>
+                </section>
+            <?php } ?>
+            <section id="content">
+@endcode
+            
+The structure was changed in order to make the application look better. A stylesheet is also linked, and
+support for a page title was added. The title is set using the 'set()` method within the controller method.
+Also, support for messages to be sent from the controller has been added. These messages can handle
+errors and notifications. The 2 variables added for this are `$message` and `$message_type`. Another
+new method used is the `linkTo()` method from the url object. The method links the url object to a 
+controller and method needed, after which the url can be print using its `toString()` method.     
+
+footer.php
+
+@code
+            </section>
+        </div>
+    </body>
+</html>
+@endcode
+
+style.css( Placed in public/css )
+
+@code
+/* Style Reset */
+body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6,
+pre, form, fieldset, input, textarea, p, blockquote, th, td { padding: 0; margin: 0; font-style: arial; }
+fieldset, img {  border: 0; }
+table { border-collapse: collapse; border-spacing: 0; }
+ol, ul { list-style: none; }
+caption,th { text-align:left; }
+address, caption, cite, code, dfn, em, strong, th, var { font-weight: normal; font-style: normal; }
+h1, h2, h3, h4, h5, h6 { font-weight: normal; font-size: 100%; }
+q:before, q:after { content: ''; }
+abbr, acronym { border: 0; }
+ 
+/* HTML5 tags */
+header, section, footer, aside, nav, article, figure { display: block; }
+ 
+/* General */
+body { font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
+a { text-decoration: none; }
+a:hover { text-decoration: underline; }
+table { width: 100%; }
+table tr td { font-size: 12px; padding: 5px; }
+table tr td a { margin: 0px 5px; }
+form {  }
+form p { padding: 7px 0px; }
+form input { padding: 5px; margin-left: 5px; }
+#wrapper { width: 800px; margin: 0px auto; }
+ 
+/* Header */
+header { overflow: hidden; }
+header h1 { font-size: 24px; margin-top: 30px; margin-bottom: 20px; padding: 30px; background: #333; color: #FFF; float: left; }
+header #add-new-book { float: right; margin: 100px 0px 0px 0px; }
+header #add-new-book a { margin: 0px 10px 0px 20px; }
+ 
+/* Message */
+section#message { padding: 10px; margin: 0px 0px 10px; border: 1px solid #37a1fa; background: #cfe6f8; }
+section#message.error { padding: 10px; margin: 0px 0px 10px; border: 1px solid #fa3737; background: #f9c5c5; }
+ 
+/* Content */
+section#content { padding: 20px 0px; border-bottom: 1px solid #656565; border-top: 1px solid #656565; }
+section#content h2 { font-size: 16px; font-weight: bold; margin: 0px 0px 10px; }
+@endcode
+
+books_edit.php
+
+@code
+<h2>Edit book <?php echo $row->title;?></h2>
+<form method="post" action="<?php echo $this->url->base();?>books/update/<?php echo $row->id;?>">
+    <p>
+        <label for="title">Title : </label>
+        <input id="title" type="text" name="title" value="<?php echo $row->title;?>"/>
+    </p>
+    <p>
+        <label for="author">Author : </label>
+        <input id="author" type="text" name="author" value="<?php echo $row->author;?>"/>
+    </p>
+    <p>
+        <label for="description">Description : </label>
+        <input id="description" type="text" name="description" value="<?php echo $row->description;?>"/>
+    </p>
+    <p>
+        <label for="year">Year : </label>
+        <input id="year" type="text" name="year" value="<?php echo $row->year;?>" />
+    </p>
+    <p>
+        <input type="submit" value="Save"/>
+    </p>
+</form>
+@endcode
+
+books_add.php
+
+@code
+<h2>Add new book</h2>
+<form method="post" action="<?php echo $this->url->base();?>books/save">
+    <p>
+        <label for="title">Title : </label>
+        <input id="title" type="text" name="title"/>
+    </p>
+    <p>
+        <label for="author">Author : </label>
+        <input id="author" type="text" name="author"/>
+    </p>
+    <p>
+        <label for="description">Description : </label>
+        <input id="description" type="text" name="description"/>
+    </p>
+    <p>
+        <label for="year">Year : </label>
+        <input id="year" type="text" name="year"/>
+    </p>
+    <p>
+        <input type="submit" value="Save"/>
+    </p>
+</form>
+@endcode
+
+books_view.php
+
+@code
+<table>
+    <?php while ( $row = $this->model->nextObject( $result ) ) { ?>
+        <tr>
+            <td><?php echo $row->title;?></td>
+            <td><?php echo $row->author;?></td>
+            <td><?php echo $row->description;?></td>
+            <td><?php echo $row->year;?></td>
+            <td><?php echo $row->added_on;?></td>
+            <td>
+                <a href="<?php echo $this->url->base();?>books/edit/<?php echo $row->id;?>" >Edit</a>
+                <a href="<?php echo $this->url->base();?>books/delete/<?php echo $row->id;?>" >Delete</a>
+            </td>
+        </tr>
+    <?php } ?>
+</table>
+@endcode
+
+
+*/

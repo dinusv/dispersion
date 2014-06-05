@@ -1,0 +1,320 @@
+/**
+@page qs_uploading_images Uploading Images
+
+This section documents the upload of each book. Because they are needed only as reference, they can be stored
+in thumb size. To do that, images need to be resized once uploaded.
+
+The first thing needed is an upload field in 'books_add.php' view file. Notice `enctype="multipart/form-data"`
+attribute was also added. 
+
+@code
+<h2>Add new book</h2>
+<form method="post" enctype="multipart/form-data" action="<?php echo $this->url->base();?>books/save">
+    <p>
+        <label for="title">Title : </label>
+        <input id="title" type="text" name="title"/>
+    </p>
+    <p>
+        <label for="author">Author : </label>
+        <input id="author" type="text" name="author"/>
+    </p>
+    <p>
+        <label for="description">Description : </label>
+        <input id="description" type="text" name="description"/>
+    </p>
+    <p>
+        <label for="year">Year : </label>
+        <input id="year" type="text" name="year"/>
+    </p>
+    <p>
+        <label for="image">Image : </label>
+        <input id="image" type="file" name="image"/>
+    </p>
+    <p>
+        <input type="submit" value="Save"/>
+    </p>
+</form>
+@endcode
+
+## Uploading
+
+The actual upload will be dealt with within the update method of the controller. FileUpload is a class 
+implemented for this purpose. It can be used for multiple file uploads. Its method FileUpload::moveTo takes
+2 parameters, the first one being a string containing the location wher uploaded files will be stored, and
+the second is an array of keys and values, where the keys represent the name given to the file input filed,
+and the values are the names o the files that will be saved. If the values are empty strings, the fiesl will
+be uploaded with their original name. All successful uploads will be set in the upload_success public aray 
+field of the object. The method throws an UploadFileException in case the upload didn't succeed or the file 
+did not meet the set requirements. Here's an example, say we have a file input field 'image' :
+
+@code
+try {
+    // File upload
+    $upl = new FileUpload();
+    $upl->restrictType( 'image/jpeg' );
+    $upl->restrictSize(0, 2000000); // ~2 Mb
+    $upl->moveTo('images/', array( 'image' => 'temp.jpg') );
+} catch( UploadFileException $e ){
+    echo 'Upload failed: ' . $e->getMessage();
+}
+@endcode
+
+The type was restricted to only jpeg images, and the maximum size is almost 2 Mb. `restrictType` and
+`restrictSize` will add those restrictions to all files that will be moved with this $upl object. In case
+the upload fails, the exceptions error message is echoed out.
+
+## Resizing Images
+
+Resizing images is easy using the Image helper. The helper is a wrapper for a single image, and can perform a 
+number of tasks on the image. Here's a simple example on how to create a thumb for an image:
+
+@code
+$image = new Image( 'image.jpg');
+$image->resize(250, 250)->saveAs('imagethumb.jpg');
+@endcode
+
+## Putting it together
+
+Go to public directory, and create a new directory named 'covers'. In the save method from the books controller 
+we will put the uploading and resizing together :
+
+@code
+<?php
+class BooksController extends Controller{
+     
+    public function index(){/*...*/}
+     
+    public function add(){/*...*/}
+     
+    public function save(){
+        try {
+            // File upload
+            $upl = new FileUpload();
+            $upl->restrictType( 'image/jpeg' );
+            $upl->restrictSize(0, 2000000); // ~2 Mb
+            $upl->moveTo( ROOT . '/public/covers/', array( 'image' => 'temp.jpg') );
+             
+            // Insert fields
+            $fv = new FormValidation();
+            $this->model->insert( array(
+                'title' =>
+                    $fv->field('title')->required()->minLength(5)->maxLength(255)->trim()->toentities()->getValue(),
+                'author' =>
+                    $fv->field('author')->required()->maxLength(127)->trim()->toentities()->getValue(),
+                'description' =>
+                    $fv->field('description')->toentities()->getValue,
+                'year' =>
+                    $fv->field('year')->minLength(3)->maxLength(5)->toentities()->getValue(),
+                'added_on' => date('Y-m-d')
+            ));
+             
+            // Convert image
+            if ( $upl->upload_success['image'] ){
+                $last_id = $this->model->lastId();
+                $image = new Image( ROOT . '/public/covers/temp.jpg');
+                $image->resize(250, 250)->saveAs(ROOT . '/public/covers/' . $last_id . '.jpg');
+                unlink(ROOT . '/public/covers/temp.jpg');
+            }
+             
+            $this->flash->set( 'message', 'Book saved succesfully.' );
+            $this->url->linkTo('books')->redirect();
+        } catch( UploadFileException $e ){
+            $this->flash->set( 'message', $e->getMessage() );
+            $this->flash->set( 'message_type', 'error' );
+            $this->url->linkTo( 'books', 'add' )->redirect();
+        } catch( InvalidFieldException $e ){
+            $this->flash->set( 'message', "<b>" . $e->getFieldName() . " : </b>" . $e->getMessage() );
+            $this->flash->set( 'message_type', 'error' );
+            $this->url->linkTo( 'books', 'add' )->redirect();
+        }
+    }
+     
+    public function edit( $id = null ){/*...*/}
+     
+    public function update( $id = null ){/*...*/}
+     
+    public function delete( $id = null ){/*...*/}
+     
+}
+@endcode
+
+Handling the file upload is necessary before the data insertion, because in case of an upload error, no
+data should be added to thedatabase. The image is first uploaded as 'temp.jpg'. This is because we will be
+saving only after we do the conversion. After inserting the data in the database, we are getting the last
+inserted id in order to save the image with the same id as the book. Since not all books will have an image
+it's important to check if there actually was an upload before resizing. 
+
+Listing the covers in the book collection is done in the `books_view.php` file :
+
+@code
+<table>
+    <?php while ( $row = $this->model->nextObject( $result ) ) { ?>
+    <tr>
+        <td>
+        <?php
+            if( file_exists(ROOT . '/public/covers/' . $row->id . '.jpg') ) {
+                echo '<img alt="' . $row->title . '" src="' . $this->url->base() . '/public/covers/' . $row->id . '.jpg' . '" />';
+            }
+        ?>
+        </td>
+        <td><?php echo $row->title;?></td>
+        <td><?php echo $row->author;?></td>
+        <td><?php echo $row->description;?></td>
+        <td><?php echo $row->year;?></td>
+        <td><?php echo $row->added_on;?></td>
+        <td>
+            <a href="<?php echo $this->url->base();?>books/edit/<?php echo $row->id;?>" >Edit</a>
+            <a href="<?php echo $this->url->base();?>books/delete/<?php echo $row->id;?>" >Delete</a>
+        </td>
+    </tr>
+    <?php }?>
+</table>
+@endcode
+
+When editing a book, the option of changing an image should be present, therefore the following changes
+need to be made :
+
+@code
+<h2>Edit book <?php echo $row->title;?></h2>
+<form method="post" enctype="multipart/form-data" action="<?php echo $this->url->base();?>books/update/<?php echo $row->id;?>">
+    <p>
+        <label for="title">Title : </label>
+        <input id="title" type="text" name="title" value="<?php echo $row->title;?>"/>
+    </p>
+    <p>
+        <label for="author">Author : </label>
+        <input id="author" type="text" name="author" value="<?php echo $row->author;?>"/>
+    </p>
+    <p>
+        <label for="description">Description : </label>
+        <input id="description" type="text" name="description" value="<?php echo $row->description;?>"/>
+    </p>
+    <p>
+        <label for="year">Year : </label>
+        <input id="year" type="text" name="year" value="<?php echo $row->year;?>" />
+    </p>
+    <p>
+        <?php if ( file_exists(ROOT . '/public/covers/' . $row->id . '.jpg')) { ?>
+            <p><img alt="<?php echo $row->title;?>" src="<?php echo $this->url->base() . '/public/covers/' . $row->id . '.jpg';?>" /></p>
+            <p><a href="<?php echo $this->url->base();?>books/deleteimage/<?php echo $row->id;?>">Delete Image</a></p>
+        <?php } else {?>
+            <label for="image">Image : </label>
+            <input id="image" type="file" name="image"/>
+        <?php }?>
+    </p>
+    <p>
+        <input type="submit" value="Save"/>
+    </p>
+</form>
+@endcode
+
+And the delete image method in the `bookscontroller.php` :
+
+@code
+<?php
+class BooksController extends Controller {
+ 
+    public function index() {/*...*/}
+ 
+    public function add() {/*...*/}
+ 
+    public function save() {/*...*/}
+ 
+    public function edit($id = null) {/*...*/}
+ 
+    public function update($id = null) {/*...*/}
+ 
+    public function delete($id = null) {/*...*/}
+ 
+    public function deleteimage($id = null) {
+        if( $id === null )
+            $this->url->linkTo('books')->redirect();
+        $file = ROOT . '/public/covers/' . $id . '.jpg';
+        if( file_exists($file) )
+            unlink($file);
+        $this->url->linkTo('books', 'edit', $id)->redirect();
+    }
+ 
+}
+@endcode
+
+The update method is left, where changing the books cover is possible. It mostly handles the same issues
+like the `add()` method ( upload and resizing ), the only difference is in receiving the book id. The 
+delete method is also changed in order to delete the file if the book gets deleted.
+
+@code
+<?php
+class BooksController extends Controller {
+ 
+    public function index() {/*...*/}
+ 
+    public function add() {/*...*/}
+ 
+    public function save() {/*...*/}
+ 
+    public function edit($id = null) {/*...*/}
+ 
+    public function update($id = null) {
+        if( $id === null )
+            $this->url->linkTo('books')->redirect();
+        if( !$this->model->selectRow($id) )
+            $this->url->linkTo('books')->redirect();
+        try {
+            // File upload
+            $upl = new FileUpload();
+            $upl->restrictType('image/jpeg');
+            $upl->restrictSize(0, 2000000); // ~2 Mb
+            $upl->moveTo(ROOT . '/public/covers/', array('image' => 'temp.jpg'));
+             
+            // Update fields
+            $fv = new FormValidation();
+            $this->model->updateRow(    array(
+                'title' =>
+                    $fv->field('title')->required()->minLength(5)->maxLength(255)->trim()->toentities()->getValue(),
+                'author' =>
+                    $fv->field('author')->required()->maxLength(127)->trim()->toentities()->getValue(),
+                'description' =>
+                    $fv->field('description')->toentities()->getValue,
+                'year' =>
+                    $fv->field('year')->minLength(3)->maxLength(5)->toentities()->getValue(),
+                'added_on' =>
+                    date('Y-m-d')), $id);
+             
+            // Convert image
+            if( $upl->upload_success['image'] ) {
+                $image = new Image(ROOT . '/public/covers/temp.jpg');
+                $image->resize(250, 250)->saveAs(ROOT . '/public/covers/' . $id . '.jpg');
+                unlink(ROOT . '/public/covers/temp.jpg');
+            }
+            $this->flash->set('message', 'Book updated succesfully.');
+            $this->url->linkTo('books')->redirect();
+        } catch( UploadFileException $e ) {
+            $this->flash->set('message', $e->getMessage());
+            $this->flash->set('message_type', 'error');
+            $this->url->linkTo('books', 'edit', $id)->redirect();
+        } catch( InvalidFieldException $e ) {
+            $this->flash->set('message', "<b>" . $e->getFieldName() . " : </b>" . $e->getMessage());
+            $this->flash->set('message_type', 'error');
+            $this->url->linkTo('books', 'edit', $id)->redirect();
+        }
+    }
+ 
+    public function delete($id = null) {
+        if( $id === null )
+            $this->url->linkTo('books')->redirect();
+        $file = ROOT . '/public/covers/' . $id . '.jpg';
+        if( file_exists($file) )
+            unlink($file);
+        $this->model->deleteRow($id);
+        $this->flash->set('message', 'Book deleted.');
+        $this->url->linkTo('books')->redirect();
+    }
+ 
+    public function deleteimage($id = null) {/*...*/}
+ 
+}
+@endcode
+
+The last section deals with [user authentication](@ref qs_authentication).
+
+*/

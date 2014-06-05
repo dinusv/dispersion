@@ -1,0 +1,47 @@
+/**
+@page configuration_error_handling Error Handling
+
+In the application/config/errors.php file you can set up how Inevy Dispersion handles errors. These settings
+will be used globally throughout the website and become useful when changing work from offline to online, 
+or during website maintenance.
+
+## Project Stage
+
+The project stage can be in 'development' or in 'production'. When in development, all errors, exceptions 
+and debug messages will be printed on screen. In production mode, everything will be hidden and can only be
+logged to a file. Setting the project stage can be done from the following line:
+
+@code
+// Development stage
+Config::errors( 'stage', 'development' );
+ 
+// Production stage
+Config::errors( 'stage', 'production' );
+@endcode
+
+## Php ini file
+
+To have full control over the project and it's stages, it's recommended that you let the framework set it's
+own settings over the php.ini file, especially when it comes to handling errors. If the php.ini file is used,
+the framework will retrieve the settings stored in the file in order to display and log errors.
+
+@code
+Config::phpini( 'overwrite',  true ); // we recommend you set this to true
+@endcode
+
+Set the following to true if you want to log your errors to a file.
+
+@code
+Config::phpini( 'log_errors', true );
+@endcode
+
+If log_errors is true, you can specify the file to be used. The ROOT global is used here in order to specify
+the path to the framework. DS is a directory separator, which in most cases is a slash ( / ).  You can 
+leave this empty if you want the framework to use the log file specified in the php.ini file.
+
+@code
+// Path will be Location_to_framework/tmp/errorlog.txt
+Config::phpini( 'log_file', ROOT . DS . 'tmp' . DS . 'errorlog.txt' );
+@endcode
+
+*/

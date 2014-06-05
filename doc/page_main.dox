@@ -1,0 +1,31 @@
+/**
+@mainpage Contents
+
+The following sections describe features and the most optimal usage of this framework.
+
+## Quick Start
+
+The best place to get started and catch a glimpse of how this framework works. A step by step guide
+which covers the main flow of the application.
+
+1. Configuration
+2. First Application
+3. Adding and Editing
+4. Layouts and Styling
+5. Adding Messages
+6. Uploading Images
+7. Authentication
+
+## Configuration
+
+Describes all configuration options :
+1. Main Configuration File
+2. Error Configuration File
+
+## Main Components
+
+Once the flow of the application is known, further documentation can be easily understood when analyzing
+the <a href="modules.html">modules</a> page and <a href="annotated.html">classes</a> of this framework.
+
+
+*/

@@ -1,0 +1,346 @@
+/**
+@page qs_adding_and_editing Adding and Editing
+
+## Adding content
+
+Up until now we have discussed viewing the entries we have added to the database manually. The next
+approach is creating a form to add books. To access the form a link to that form is needed, in other
+words, a new controller method. Calling it 'add', the method can be triggered, and therefore the page
+accesed by directing the browser to : `http://localhost/books/add`. Currently, we will display the
+soon to be created view file :
+
+@code
+<?php
+class BooksController extends Controller{
+     
+    public function index(){
+        $this->insertView( 'books_view' );
+        $result = $this->model->select();
+        $this->set( 'result', $result );
+    }
+     
+    public function add(){
+        $this->insertView( 'books_add' );
+    }
+     
+}
+@endcode
+
+And now, the view file created in the `application/views` directory, named 'books_add.php' containing :
+
+@code
+<html>
+    <head>
+        <title>Add a new book</title>
+    </head>
+    <body>
+        <form method="post" action="<?php echo $this->url->base();?>books/save">
+            <p>
+                <label for="title">Title : </label>
+                <input id="title" type="text" name="title"/>
+            </p>
+            <p>
+                <label for="author">Author : </label>
+                <input id="author" type="text" name="author"/>
+            </p>
+            <p>
+                <label for="description">Description : </label>
+                <input id="description" type="text" name="description"/>
+            </p>
+            <p>
+                <label for="year">Year : </label>
+                <input id="year" type="text" name="year"/>
+            </p>
+            <p>
+                <input type="submit" value="Save"/>
+            </p>
+        </form>
+    </body>
+</html>
+@endcode
+
+The form has been linked to the 'save()' method within the books controller. The 'save()' method will 
+receive data posted by the form and will insert it to the database, and after it will redirect the
+user to the `index()` method, listing the entries toghether with the newly one added. A method `insert()`
+is available in the frameworks model in order to insert data to the database. 
+
+The `insert()` method receives an array of parameters in which the key represents the table column the
+value will be added to, and the value of the array represents the value that will be added. In this case
+the `save()` method will look like this :
+
+@code
+class BooksController extends Controller{
+     
+    public function index(){
+        $this->insertView( 'books_view' );
+        $result = $this->model->select();
+        $this->set( 'result', $result );
+    }
+     
+    public function add(){
+        $this->insertView( 'books_add' );
+    }
+     
+    public function save(){
+        $this->model->insert(array(
+            'title' => $_POST['title'],
+            'author' => $_POST['author'],
+            'description' => $_POST['description'],
+            'year' => $_POST['year'],
+            'added_on' => date('Y-m-d')
+        ));
+        $this->url->linkTo( 'books' )->redirect();
+    }
+ 
+}
+@endcode
+
+This method will work, but doesn't check wether the user inputs correct information. What if the user 
+submits an empty title? Or what if the year is invalid? Adding restriction to fields can mean a lot of
+boiler plate code checking everything, that's why a library that already does that is used. The library
+is a class called FormValidation, and since it's optional, an instance is not already available within
+the frameworks core libraries, so we need to create one manually. It's constructor has an optional 
+argument representing the method by which the form was posted ( 'post' or 'get' ). If the argument is 
+missing, it will default to 'post'. Since in this case the data was sent by post, there's no need to 
+specify it in the constructor. Below you can see how easy it is to check everything this way :
+
+@code
+<?php
+class BooksController extends Controller{
+ 
+    public function index(){
+        $this->insertView( 'books_view' );
+        $result = $this->model->select();
+        $this->set( 'result', $result );
+    }
+ 
+    public function add(){
+        $this->insertView( 'books_add' );
+    }
+ 
+    public function save(){
+        $fv = new FormValidation();
+        $this->model->insert( array(
+            'title' =>
+                $fv->field('title')->required()->minLength(5)->maxLength(255)->trim()->toentities()->getValue(),
+            'author' =>
+                $fv->field('author')->required()->maxLength(127)->trim()->toentities()->getValue(),
+            'description' =>
+                $fv->field('description')->toentities()->getValue,
+            'year' =>
+                $fv->field('year')->minLength(3)->maxLength(5)->toentities()->getValue(),
+            'added_on' => date('Y-m-d')
+        ));
+        $this->url->linkTo('books')->redirect();
+    }
+}
+@endcode
+
+The form validation object uses it's `field()` method to select each form field by it's name, then the
+next chained methods validate it, and the chain is ended with the `getValue()` method in order to retrieve 
+it's value and insert it into the table. The methods within the chain used to validate are quite self
+explanatory : `required()` makes sure the field gets filled, minLength( and maxLength() make sure the length
+of the field is between those two values, toEntities() creates html entities in order to prevent xss attaks,
+and `trim()` makes sure there are no spaces between the received text. If one of the fields is not property
+filled, an exception will be thrown.
+
+To test this, direct your browser to the `add()` method of the books controller ( example :
+http://localhost/books/add ), and you shold see the created form. If you fill the form correctly, 
+you will be successfully redirected to the books index page, and see the newly added entry. However, if
+you do not comply to the required standards, after you submit, you should see a message describing
+an InvalidFieldException. When in development, every exception that is thrown in a controllers method
+is automatically caught and displayed on screen, so you can see it's stack trace. A good feature when developing,
+but when the website is live, users need to be warned through a more proper way the form hasn't been filled
+correcly. To do that, a try-catch block can display this type of message :
+
+@code
+<?php
+class BooksController extends Controller{
+         
+    public function index(){
+        $this->insertView( 'books_view' );
+        $result = $this->model->select();
+        $this->set( 'result', $result );
+    }
+     
+    public function add(){
+        $this->insertView( 'books_add' );
+    }
+     
+    public function save(){
+        try {
+            $fv = new FormValidation();
+            $this->model->insert( array(
+                'title' =>
+                    $fv->field('title')->required()->minLength(5)->maxLength(255)->trim()->toentities()->getValue(),
+                'author' =>
+                    $fv->field('author')->required()->maxLength(127)->trim()->toentities()->getValue(),
+                'description' =>
+                    $fv->field('description')->toentities()->getValue,
+                'year' =>
+                    $fv->field('year')->minLength(3)->maxLength(5)->toentities()->getValue(),
+                'added_on' => date('Y-m-d')
+            ));
+            $this->url->linkTo('books')->redirect();
+        } catch( InvalidFieldException $e ){
+            echo "<b>" . $e->getFieldName() . " : </b>" . $e->getMessage();
+            echo '( <a href="' . $this->url->base() . '"books/add>Go back</a> )';
+        }
+    }
+}
+@endcode
+
+The InvalidFieldException class contains the error message and the name of the field that's the
+problem. These can be retrieved by the `getMessage()` and the `getFieldName()` method. We use these to
+display the error to the user.
+
+## Editing Content
+
+In order to edit a book, one needs to receive it's id. As you remember when we created the edit links, 
+the url looked similar to `/books/edit/id`, where 'id' is a number representing the id of the book. 
+That means that the id will be received as a methods parameter. Here's how the edit method will look :
+
+@code
+<?php
+class BooksController extends Controller{
+ 
+    public function index(){ /* ... */  }
+ 
+    public function add(){ /* ... */ }
+     
+    public function save(){ /* ... */ }
+     
+    public function edit( $id = null ){   
+        if ( $id === null )
+            $this->url->linkTo( 'books' )->redirect();
+        $row = $this->model->selectRow( $id );
+        if ( !$row )
+            $this->url->linkTo( 'books' )->redirect();
+        $this->set( 'row', $row );
+        $this->insertView( 'books_edit' );
+    }
+ 
+}
+@endcode
+
+The `$id` will default to null if it's not present in the url, that's why a check is made in order to see
+if the url is correct. The `selectRow()` method from the model selects the row by the primary key, and 
+returns the row if the row is found, otherwise null. 
+Here's the code for the books_edit.php view file:
+
+@code
+<html>
+    <head>
+        <title>Edit book <?php echo $row->title;?></title>
+    </head>
+    <body>
+        <form method="post" action="<?php echo $this->url->base();?>books/update/<?php echo $row->id;?>">
+            <p>
+                <label for="title">Title : </label>
+                <input id="title" type="text" name="title" value="<?php echo $row->title;?>"/>
+            </p>
+            <p>
+                <label for="author">Author : </label>
+                <input id="author" type="text" name="author" value="<?php echo $row->author;?>"/>
+            </p>
+            <p>
+                <label for="description">Description : </label>
+                <input id="description" type="text" name="description" value="<?php echo $row->description;?>"/>
+            </p>
+            <p>
+                <label for="year">Year : </label>
+                <input id="year" type="text" name="year" value="<?php echo $row->year;?>" />
+            </p>
+            <p>
+                <input type="submit" value="Save"/>
+            </p>
+        </form>
+    </body>
+</html>
+@endcode
+
+The form is linked to `/books/update/id` page, where the method to update table content is similar
+ to the previous `save()` method.
+ 
+@code
+<?php
+class BooksController extends Controller{
+         
+    public function index(){ /* ... */  }
+     
+    public function add(){ /* ... */ }
+     
+    public function save(){ /* ... */ }
+     
+    public function edit( $id = null ){
+        if ( $id === null )
+            $this->url->linkTo( 'books' )->redirect();
+        $row = $this->model->selectRow( $id );
+        if ( !$row )
+            $this->url->linkTo( 'books' )->redirect();
+        $this->set( 'row', $row );
+        $this->insertView( 'books_edit' );
+    }
+     
+    public function update( $id = null ){
+        if ( $id === null )
+            $this->url->linkTo( 'books' )->redirect();
+        if ( !$this->model->selectRow( $id ) )
+            $this->url->linkTo( 'books' )->redirect();
+        try {
+            $fv = new FormValidation();
+            $this->model->updateRow( array(
+                'title' =>
+                    $fv->field('title')->required()->minLength(5)->maxLength(255)->trim()->toentities()->getValue(),
+                'author' =>
+                    $fv->field('author')->required()->maxLength(127)->trim()->toentities()->getValue(),
+                'description' =>
+                    $fv->field('description')->toentities()->getValue,
+                'year' =>
+                    $fv->field('year')->minLength(3)->maxLength(5)->toentities()->getValue(),
+                'added_on' => date('Y-m-d')
+            ), $id );
+            $this->url->linkTo('books')->redirect();
+        } catch( InvalidFieldException $e ){
+            echo "<b>" . $e->getFieldName() . " : </b>" . $e->getMessage();
+            echo '( <a href="' . $this->url->base() . 'books/edit/' . $id . '">Go back</a> )';
+        }
+    }
+}
+@endcode
+
+First we check if the book id was given, then we update the content using the updateRow() method, 
+which takes an array map of column names and their values as the first parameter, and the value of the
+primary key of the row as the second parameter.
+
+## Deleting content
+
+Finally, the deleting books is pretty straight forward. Just like methods above, `deleteRow()` deletes a 
+row that matches the same primary key :
+
+@code
+<?php
+class BooksController extends Controller{
+         
+    public function index(){ /* ... */  }
+     
+    public function add(){ /* ... */ }
+     
+    public function save(){ /* ... */ }
+     
+    public function edit( $id = null ){ /* ... */ }
+     
+    public function update( $id = null ){ /* ... */ }
+     
+    public function delete( $id = null ){
+        if ( $id === null )
+            $this->url->linkTo( 'books' )->redirect();
+        $this->model->deleteRow( $id );
+        $this->url->linkTo('books')->redirect();
+    }
+ 
+}
+@endcode
+
+The next section will cover [Layouts and Styling](@ref qs_layouts_and_styling).
+*/
