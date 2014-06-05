@@ -1,3 +1,0 @@
-[05-Jun-2014 18:45:33 UTC] PHP 8:  Undefined index: table_prefix in C:\xampp\htdocs\dispersion\libraries\database\databaseconnection.class.php on line 30
-[05-Jun-2014 18:45:34 UTC] PHP 256:  Can't use the database : No database selected in  on line 0
-[05-Jun-2014 18:47:09 UTC] PHP 256:  Can't use the database : No database selected in  on line 0
