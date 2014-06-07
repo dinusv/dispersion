@@ -3,20 +3,28 @@
 | This file is part of the Inevy Framework.         |
 | http://inevy.com                                  |
 |                                                   |
-| Copyright (c) 2010 inevy                          |
+| License : http://dispersion.inevy.com/license     |
+|                                                   |
+| Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
-
-/** Thrown when a file upload did not succeed for some reason.
- *
- * @namespace : exceptions
- * @file      : libraries/exceptions/uploadfileexception.class.php
- * @version   : 1.0
- */
  
+/**
+ * @version 1.1
+ * @author DinuSV
+ */
+
+/** 
+ * @ingroup exceptions
+ * @brief Thrown when a file upload did not succeed for the reason present within the thrown exception..
+ */
 class UploadFileException extends Exception{
 	
 	protected static
-		$messages = array(
+		/**
+		 * @var $messages
+		 * array : map of upload-error-types and their messages
+		 */
+		$messages = array(	
 			FileUpload::INI_MAX_SIZE  => 'File exceeds the maximum size',
 			FileUpload::FORM_MAX_SIZE => 'File exceeds the maximum size supported by the form',
 			FileUpload::INCOMPLETE    => 'File was not fully uploaded. Please try uploading the file again',
@@ -28,16 +36,19 @@ class UploadFileException extends Exception{
 		);
 	
 	private
-		/** Name of the field the exception was thrown for
-		 * 
-		 * @var string
+		/** 
+		 * @var $field_name
+		 * string : Name of the field the exception was thrown for
 		 */
 		$field_name;
 	
 	/** Constructor
 	 * 
-	 * @param string $message    : [optional] message to output
-	 * @param string $field_name : [optional] name of the field the exception was thrown for
+	 * @param $message_code string   : [optional] message to output
+	 * @param $field_name string     : [optional] name of the field the exception was thrown for
+	 * @param $required_value string : [optional]
+	 * @param $previous Exception    : [optional]
+	 * @param $code int              : [optional]
 	 * @see php exception
 	 */
 	public function UploadFileException( $message_code, $field_name = null, $required_value = '', $code = 0, Exception $previous = null) {
@@ -49,13 +60,13 @@ class UploadFileException extends Exception{
 	
 	/** Generates form validation message according to the messagecode given
 	 * 
-	 * @param string $message_code   : code for the message
-	 * @param string $field_name     : [optional] name of the field the exception was thrown for
-	 * @param string $required_value : [optional] value required for the field
+	 * @param $message_code string   : code for the message
+	 * @param $field_name string     : [optional] name of the field the exception was thrown for
+	 * @param $required_value string : [optional] value required for the field
 	 * 
 	 * @return string
 	 */
-	public static function generateMessage( $message_code, $field_name = '', $required_value = '' ){
+	 public static function generateMessage( $message_code, $field_name = '', $required_value = '' ){
 		if ( isset( self::$messages[$message_code] )){
 			return str_replace(array('%name', '%required'), array($field_name, $required_value), self::$messages[$message_code]);
 		} else

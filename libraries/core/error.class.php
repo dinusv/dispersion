@@ -8,26 +8,29 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/** Main error handling class
- *
- * @license   : http://dispersion.inevy.com/license
- * @namespace : core
- * @file      : libraries/error.class.php
- * @requires  : libraries/debug.class.php
- * @version   : 1.0
+/**
+ * @version 1.1
+ * @author DinuSV
  */
 
+ /** 
+  * @ingroup core
+  * @brief Main error handling class
+  *  
+  * Redirects all php errors and exceptions here. Outputs errors only in development stage.
+  * Uses Debug object to output errors.
+  */
 class Error{
 	
-	/** The object used for debugging. 
-	 * 
-	 * @var Debug
+	/** 
+	 * @var $debug
+	 * Debug : The object used for debugging
 	 */
 	private $debug = null;
 	
-	/** Instance of this object.
-	 * 
-	 * @var Error
+	/** 
+	 * @var $instance
+	 * Error : Instance of this object
 	 */
 	public static $instance = null;
 	
@@ -38,19 +41,20 @@ class Error{
 	private
 		/** Stage of the project : development, production
 		 * 
-		 * @var boolean
+		 * @var $dev_stage
+		 * bool : Stage of the project : development / production
 		 */
 		$dev_stage,
 		
-		/** Used for reporting code from the source file
-		 * 
-		 * @var integer
+		/** 
+		 * @var $code_line_count
+		 * int : Used for reporting code from the source file
 		 */
 		$code_line_count,
 		
-		/** Log errors to ini file if true
-		 * 
-		 * @var boolean
+		/** 
+		 * @var $log_errors
+		 * booL : Log errors to ini file if true
 		 */
 		$log_errors;
 	
@@ -59,33 +63,33 @@ class Error{
 	 * ----------------------------------------- */
 	 
 	private
-		/** Contains all errors as bits
-		 * 
-		 * @var integer
+		/** 
+		 * @var $e_error_all
+		 * int : Contains all errors as bits
 		 */
 		$e_error_all,
 		
-		/** Contains all warnings as binary flags
-		 * 
-		 * @var integer
+		/** 
+		 * @var $e_warning_all
+		 * int : Contains all warnings as binary flags
 		 */
 		$e_warning_all,
 		
-		/** Contains all notices as binary flags
-		 * 
-		 * @var integer
+		/** 
+		 * @var $e_notice_all
+		 * int : Contains all notices as binary flags
 		 */
 		$e_notice_all,
 		
-		/** Contains the debugging value as binary flag
-		 * 
-		 * @var integer
+		/** 
+		 * @var $e_debug
+		 * int : Contains the debugging value as binary flag
 		 */
 		$e_debug,
 		
-		/** Contains the deprecated value as binary flag
-		 * 
-		 * @var integer
+		/** 
+		 * @var $e_deprecated_all
+		 * int : Contains the deprecated value as binary flag
 		 */
 		$e_deprecated_all;
 	

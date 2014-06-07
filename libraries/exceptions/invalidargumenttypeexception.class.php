@@ -8,20 +8,22 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/** Thrown when a file upload did not succeed for some reason.
- *
- * @license   : http://dispersion.inevy.com/license
- * @namespace : exceptions
- * @file      : libraries/exceptions/invalidargumenttypeexception.class.php
- * @version   : 1.0
+/**
+ * @version 1.1
+ * @author DinuSV
  */
- 
+
+/** 
+ * @ingroup exceptions
+ * @brief Thrown when a file upload did not succeed for some reason.
+ */
 class InvalidArgumentTypeException extends Exception{
 	
 	/** Constructor
 	 * 
-	 * @param array $message  : you can give the types of arguments supported as an array to include into the message.
-	 * @param string $message : @see php exception
+	 * @param array-string $message  : you can give the types of arguments supported as an array to include into the message.
+	 * @param int $code              : [optional]
+	 * @param Exception $previous    : [optional]
 	 */
 	public function InvalidArgumentTypeException($message = array(), $code = 0, Exception $previous = null) {
 		if ( is_array( $message ) ){

@@ -8,44 +8,140 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/**
- * @license   : http://dispersion.inevy.com/license
- * @namespace : helpers
- * @file      : libraries/helpers/image.class.php
- * @version   : 1.0
+ /**
+ * @version 1.2
+ * @author DinuSV
  */
- 
+
+/** 
+ * @ingroup helpers
+ * @brief Image wrapper. Offers support between image-format conversions, resizing, watermarking and quality management.
+ * 
+ * Creating an object is done by passing an image path to the constructor
+ * 
+ * @code
+ * // Relative path
+ * $image = new Image("myimage.jpg");
+ * // Absolute path
+ * $image = new Image( ROOT . "/images/myimage.jpg" );
+ * @endcode
+ * 
+ * Width and height of the image can be optained by the following getter methods :
+ * 
+ * @code
+ * $image  = new Image("myimage.jpg");
+ * $width  = $image->getWidth(); // Get width in pixels
+ * $height = $image->getHeight();// Get height in pixels
+ * $type   = $image->getType();  // jpg, png or gif
+ * @endcode
+ * 
+ * For custom processing, the php image resource can be obtained : 
+ * 
+ * @code
+ * $resource = $image->resource();
+ * @endcode
+ * 
+ * Resizing can be done by either scaling the image, or resizing it according to a set width or height.
+ * 
+ * @code
+ * $image = new Image("myimage.jpg");
+ * $image->scale(50); // scale image by 50%
+ * @endcode
+ * 
+ * When resizing by a set size, the original proportions of the image can be kept, and resizing the image
+ * will be based either on the width, or on the height, depending which one is bigger. Sharpening while 
+ * resizing will create a higher quality image, but will consume more resorces, so the process might take
+ * longer.
+ * 
+ * @code
+ * $image = new Image("myimage");
+ * $image->resize( 400, 400 ); //constrain proportions and sharpen the image
+ * $image->resize( 400, 400, true, false); //constrain proportions, but don't sharpen
+ * @endcode
+ * 
+ * Two images can be merged using Image::mergeWidth :
+ * 
+ * @code
+ * // Merge a logo with 75% opacity over a waterfall
+ * $image = new Image("waterfall.jpg");
+ * $image->mergeWith( new Image("logo.jpg"), 0, 0, 0, 0, null, null, 75% );
+ * 
+ * // Crop the center of the waterfall by 200x200px and merge it over the logo
+ * $image_logo  = new Image("logo.jpg");
+ * $image_water = new Image("waterfall.jpg");
+ * $image_logo->mergeWith( $image_water,
+ *     0, 0,
+ *     $image_water->getWidth() / 2 - 100, // crop 100px just before the center
+ *     $image_water->getHeight() / 2 - 100, // crop 100px above the center
+ *     200, 200 // crop on a 200x200 pixel radius
+ *     75 // 75% opacity
+ * );
+ * @endcode
+ * 
+ * Adding a watermark at the center of an image is done by positioning it's corner relative to its 
+ * width and height, and relative to the images width and height. Presuming its corner is positioned at 
+ * (x,y), we need to subtract half of the width and half of the height of the watermark from the center
+ * of the image.
+ * 
+ * @code
+ * $source    = new Image("source.jpg");
+ * $watermark = new Image("watermark.jpg");
+ * $source->mergeWith(
+ *     $watermark,
+ *     floor( $source->getWidth() / 2 ) - floor( $watermark->getWidth() / 2 ),
+ *     floor( $source->getHeight() / 2) - floor( $watermark->getHeight() / 2),
+ *     0, 0,
+ *     null, null,
+ *     70%
+ * );
+ * @endcode
+ * 
+ * The new image can be saved using Image::saveAs :
+ * 
+ * @code
+ * $image = new Image("myimage.jpg");
+ * $image->saveAs( "myimage.png" ); // image will be converted to png
+ * $image->saveAs( "myimage.jpg", null, 100 ); // image will be saved as a jpeg with high quality
+ * @endcode
+ * 
+ * These methods can also be chained to provide a more readable code :
+ * @code
+ * $image = new Image("image.jpg");
+ * $image->resize( 800, 600 )->mergeWith( new Image("watermark.jpg") )->saveAs( "wimage.jpg" );
+ * @endcode
+ * 
+ */
 class Image{
 	
 	private static
-		/** Default quality to save the image as ( [0, 100] )
-		 * 
-		 * @var integer
+		/** 
+		 * @var $default_quality
+		 * int : Default quality to save the image as ( [0, 100] )
 		 */
 		$default_quality = 90;
 	
 	private
-		/** Type of the image ( jpeg, png, gif )
-		 * 
-		 * @var string
+		/** 
+		 * @var $type
+		 * string : Type of the image ( 'jpeg', 'png', 'gif' )
 		 */
 		$type,
 		
-		/** Image resource
-		 * 
-		 * @var resource
+		/** 
+		 * @var $source
+		 * resource : Image resource
 		 */
 		$source,
 		
-		/** Width of the image
-		 * 
-		 * @var integer
+		/**
+		 * @var $height
+		 * int : Width of the image
 		 */
 		$height,
 		
-		/** Height of the image
-		 * 
-		 * @var integer
+		/** 
+		 * @var $width
+		 * int : Height of the image
 		 */
 		$width;
 	
@@ -84,7 +180,7 @@ class Image{
 	
 	/** Returns the current width of the image
 	 * 
-	 * @return integer
+	 * @return int
 	 */
 	public function getWidth(){
 		return $this->width;
@@ -92,7 +188,7 @@ class Image{
 	
 	/** Returns the current height of the image
 	 * 
-	 * @return integer
+	 * @return int
 	 */
 	public function getHeight(){
 		return $this->height;
@@ -154,7 +250,7 @@ class Image{
 	
 	/** Resize the image based on a percentage of the original 
 	 * 
-	 * @param integer $scale : percentage ( [0, 100] )
+	 * @param int $scale : percentage ( [0, 100] )
 	 * 
 	 * @return Image        : current object
 	 */
@@ -164,12 +260,12 @@ class Image{
 	
 	/** Resize the image based on width and height
 	 * 
-	 * @param integer $width     : width of the resized image in pixels
-	 * @param integer $height    : height of the resized image in pixels
-	 * @param boolean $constrain : if set to true, the proportions ( image / height )of the original image will be kept
-	 * @param boolean $sharpen   : set to true in order to sharpen image, but also extend the process of conversion. 
+	 * @param int $width      : width of the resized image in pixels
+	 * @param int $height     : height of the resized image in pixels
+	 * @param bool $constrain : if set to true, the proportions ( image / height )of the original image will be kept
+	 * @param bool $sharpen   : set to true in order to sharpen image, but also extend the process of conversion. 
 	 * 
-	 * @return Image            : current object
+	 * @return Image          : current object
 	 */
 	public function resize( $width, $height, $constrain = true, $sharpen = true ){
 		/* Constrain proportions ( based on height/width ) */
@@ -233,7 +329,7 @@ class Image{
 	 * 
 	 * @param Image $image
 	 * @param integer $this_x       : optional, X-coordinate to merge the image on, default = 0
-	 * @param integer $thix_y       : optional, Y-coordinate to merge the image on, default = 0
+	 * @param integer $this_y       : optional, Y-coordinate to merge the image on, default = 0
 	 * @param integer $image_x      : optional, X-coordinate of the merging image, default = 0
 	 * @param integer $image_y      : optional, Y-coordinate of the merging image, default = 0
 	 * @param integer $image_width  : optional, width of the merging image, default = 0

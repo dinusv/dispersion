@@ -8,38 +8,39 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/** Node to create hierarchical tree structures
- * 
- * @license   : http://dispersion.inevy.com/license
- * @file      : libraries/helpers/node.php
- * @parent    : PHP DateTime class
- * @version   : 1.0
+ /**
+ * @version 1.2
+ * @author DinuSV
  */
 
+/** 
+ * @ingroup helpers
+ * @brief General node for tree like structures.
+ */
 class Node{
 	
 	protected
-		/** Node content, will output before the nodes children in case of recursion
-		 * 
-		 * @var mixed
+		/** 
+		 * @var $content
+		 * mixed : Node content, will output before the nodes children in case of recursion
 		 */
 		$content = '',
 		
-		/** Content to output after the nodes children in case of recursion
-		 * 
-		 * @var mixed
+		/** 
+		 * @var $content_after
+		 * mixed : Content to output after the nodes children in case of recursion
 		 */
 		$content_after = '',
 		
-		/** Array of Node type elements
-		 * 
-		 * @var array
+		/** 
+		 * @var $children
+		 * array : Array of Node type elements
 		 */
 		$children = array(),
 		
-		/** The parent of the current node, this field is optional
-		 * 
-		 * @var Node
+		/** 
+		 * @var $parent
+		 * Node : The parent of the current node, this field is optional
 		 */
 		$parent = null;
 	
@@ -222,8 +223,6 @@ class Node{
 	}
 	
 	/** To string method
-	 * 
-	 * @override
 	 * 
 	 * @return string
 	 */

@@ -8,61 +8,163 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/**
- * @license   : http://dispersion.inevy.com/license
- * @namespace : optional
- * @file      : libraries/optional/formvalidation.class.php
- * @version   : 1.1
+
+ /**
+ * @version 1.2
+ * @author DinuSV
  */
 
+/** 
+ * @ingroup libraries
+ * @brief Minimizes form validation code.
+ * 
+ * The FormValidation library is a quick and easy way to validate the fields of a form. The process 
+ * includes selecting the field, chaining the necessary methods in a try-catch block, and displaying
+ * the exception. 
+ * 
+ * A list of the validation functions supported by this library :
+ * 
+ * @code
+ * $fv = new FormValidation('post'); // Form submission type: post/get
+ * $fv->field('field_name'); // field to validate
+ * $fv->required(); // set this field as required
+ * $fv->minLength(15); // minimum required characters
+ * $fv->maxLength(30); // maximum allowed characters
+ * $fv->rangeLength(15, 30); // field must have length between this interval
+ * $fv->pregMatch('/abc/'); // match field against regular expression
+ * $fv->email(); // check if this field is a valid email
+ * $fv->multipleEmail(); // emails separated by comma
+ * $fv->number(); // separators and numbers allowed
+ * $fv->numeric(); // only numbers allowed
+ * $fv->greaterThan(20); // field >= 20
+ * $fv->lessThan(20);  // field =< 20
+ * $fv->equals('abcd');  // field must have the specified value
+ * $fv->equalsField('password_confirm'); // field must be equal to another field
+ * $fv->alpha(); // allow only letters
+ * $fv->trim(); // trim field value
+ * $fv->toEntities(); // convert this fields entities
+ * $fv->toXmlEntities(); // convert ( <, >, &, '' ) to entities
+ * @endcode
+ * 
+ * When initializing the library, the constructor takes one optional argument representing the method
+ * the form was submited by ( post / get ). The default value is post. If you're autoloading this 
+ * library, and have a form submitted by get, make sure you change the value with `setMethod()`.
+ * 
+ * @code
+ * $this->formvalidation->setMethod('get');
+ * @endcode
+ * 
+ * This library can validate either selected field using the `field()` method, or values using the
+ * `value()` method. All validation functions throw an InvalidFieldException if the field does not meet
+ * specified criteria. The message can be received from the exception by using the `getMessage() function,
+ * and the field name using getFieldName();
+ * 
+ * @code
+ * try{
+ *    $this->formvalidation->field('name')->required();
+ * } catch ( InvalidFieldException $e ) {
+ *    echo '<b>' . $e->getFieldName() . ' : </b>' . $e->getMessage();
+ * }
+ * @endcode
+ * 
+ * The exception is thrown at the first invalid field met. This makes for printing messages one by one, until
+ * all fields have been filled properly. To output all messages within one validation, when selecting the
+ * field, 'fieldStore()' can be used instead, making the messages store into an array that can be further
+ * retrieved using `getMessages()`. Similarly for values, the `valueStore() method does the same thing. The
+ * received messages are stored in a 2-key array, where the first key is the fields name, and the second is
+ * the message counter for the field.
+ * 
+ * @code
+ * try{
+ *     $this->formvalidation->fieldStore('name')->required();
+ *     $this->formvalidation->fieldStore('email')->required()->email();
+ * } catch ( InvalidFieldException $e ) {
+ *     $messages = $this->formvalidation->getMessages();
+ *     foreach ( $messages as $field => $fieldmsgs )
+ *         foreach( $fieldmsgs as $message )
+ *             echo '<b>' . $e->getFieldName() . ' : </b>' . $e->getMessage();
+ * }
+ * @endcode
+ * 
+ */
 class FormValidation{
 	
 	const
+		/** Required field
+		 */
 		REQUIRED       = 0,
+		/** Minimum characters required
+		 */
 		MINIMUM_LENGTH = 1,
+		/** Maximum characters required
+		 */
 		MAXIMUM_LENGTH = 2,
+		/** Both minimum and maximum characters required
+		 */
 		RANGE_LENGTH   = 3,
+		/** Regular expression match
+		 */
 		PREG_MATCH     = 4,
+		/** Email type field
+		 */
 		EMAIL          = 5,
+		/** Multiple email type field
+		 */
 		EMAIL_MULTIPLE = 6,
+		/** Only number-characters allowed
+		 */
 		NUMBER         = 7,
+		/** Only number-characters and separator symbols allowed
+		 */
 		NUMERIC        = 8,
+		/** Number field needs to be greater than value
+		 */
 		GREATER_THAN   = 9,
+		/** Number field needs to be less than value
+		 */
 		LESS_THAN      = 10,
+		/** Field equals value
+		 */
 		EQUALS         = 11,
+		/** Field equals field
+		 */
 		EQUALS_FIELD   = 12,
+		/** Field is only letters
+		 */
 		ALPHA          = 13,
+		/** All form fields
+		 */
 		ALL_FIELDS     = 14;
 	
 	private
-		/** post / get
-		 *
-		 * @var string
+		/** 
+		 * @var $method
+		 * string : 'post'/'get'
 		 */
 		$method,
 		
-		/** The field to be validated
-		 *
-		 * @var string
+		/** 
+		 * @var $current_field
+		 * string : The field to be validated
 		 */
 		$current_field = null,
 		
-		/** The field value
-		 *
-		 * @var mixed
+		/** 
+		 * @var $current_field_val
+		 * mixed : The field value
 		 */
 		$current_field_val = null,
 		
-		/** Store messages and output the messages at the end or right after an invalid field has been
+		/** 
+		 * @var $messages_store
+		 * bool : Store messages and output the messages at the end or right after an invalid field has been
 		 * identified. True to store, false otherwise.
-		 *
-		 * @var boolean
 		 */
 		$messages_store = false,
 		
-		/** Messages to be stored
-		 *
-		 * @var array
+		/** 
+		 * @var $messages
+		 * array : Messages to be stored
 		 */
 		$messages;
 	
@@ -157,7 +259,8 @@ class FormValidation{
 	/** Helper method used by this class in order to either store a value or throw
 	 * an exception in case a field is not valid
 	 *
-	 * @param string message : the message to be stored or reported
+	 * @param string $message_code : the message to be stored or reported
+	 * @param string $required_value : [optional]
 	 *
 	 * @throws InvalidFieldException
 	 */
@@ -392,7 +495,7 @@ class FormValidation{
 	 * @return FormValidation : current object
 	 */
 	public function equalsField( $name ){
-		if ( $method === 'post' )
+		if ( $this->method === 'post' )
 			$value = $_POST[$name];
 		else $value = $_GET[$name];
 		if ( $this->getValue() !== $value )
@@ -439,7 +542,7 @@ class FormValidation{
 	
 	/** Convert this fields xml entities ( <, >, &, " )
 	 *
-	 * @returrn FormValidation : currentt object
+	 * @return FormValidation : currentt object
 	 */
 	public function toXmlEntities(){
 		$this->current_field_val = str_replace( array( '<', '>', '&', '"' ), array( '&lt;', '&gt;', '&amp;', '&quot;' ), $this->getValue() );
@@ -485,7 +588,7 @@ class FormValidation{
 	
 	/** Check if a parameter is a valid number
 	 * 
-	 * @param string number : the value to check
+	 * @param string $number : the value to check
 	 * 
 	 * @return boolean      : true if it's a number, false otherwise
 	 */

@@ -8,31 +8,65 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/**
- * @license   : http://dispersion.inevy.com/license
- * @namespace : optional
- * @file      : libraries/optional/log.class.php
- * @version   : 1.0 
+ /**
+ * @version 1.2
+ * @author DinuSV
  */
 
+/** 
+ * @ingroup libraries
+ * @brief Logs data to specified files.
+ * 
+ * The constructor takes the file location as its argument. If you want to autoload this library, 
+ * you can set the file using the setFile() method. Both the method and the constructor throw a 
+ * FileNotFoundException in case the file does not exist, or a NoPermissionsException in case the file 
+ * does not have permissions for writing.
+ * 
+ * @code
+ * // Creating an object
+ * $logger = new Log("myfile.txt");
+ *  
+ * // Setting the file in the constructor in case the library was autoloaded
+ * $this->log->setFile("myfile.txt");
+ * @endcode
+ * 
+ * To output a line, you can use the line() or lines() methods. Both methods throw a NoPermissionsException 
+ * in case the file is not writable.
+ * 
+ * @code
+ * $this->log->line('first statement');
+ * $this->log->lines( array( 'second statement', 'third statement' ) );
+ * @endcode
+ * 
+ * By default, an example of line that was printed will look like this: \n
+ * `2012-01-31 22:30:30 --> first statement`\n
+ * 
+ * So, the line is composed of a date and separator. The two are customizable :
+ * 
+ * @code
+ * $this->log->setDateFormat( 'Y M d H:i:s' )->setSeparator( ' ====== ' )->line( 'forth statement' );
+ * // 2012 Jan 20 22:30:30 ====== forth statement
+ * @endcode
+ * 
+ */
 class Log{
 	
 	private
-		/** Log file handler
-		 * 
-		 * @var mixed
+		/** 
+		 * @var $file_handle
+		 * resource : Log file handler
 		 */
 		$file_handle = null,
 		
-		/** Format of the date to output to the file
-		 *
-		 * @var string
+		/** 
+		 * @var $date_format
+		 * string : Format of the date to output to the file
 		 */
 		$date_format = "Y-m-d G:i:s",
 		
-		/** Separator between date and data for each line
-		 *
-		 * @var string
+		/** 
+		 * @var $separator
+		 * string : Separator between date and data for each line
 		 */
 		$separator = ' --> ';
 	

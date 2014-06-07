@@ -8,14 +8,15 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/** Thrown when a page requested is not found.
- *
- * @license   : http://dispersion.inevy.com/license
- * @namespace : exceptions
- * @file      : libraries/exceptions/pagenotfoundexception.class.php
- * @version   : 1.0
+/**
+ * @version 1.1
+ * @author DinuSV
  */
 
+/** 
+ * @ingroup exceptions
+ * @brief Thrown when a page requested is not found.
+ */
 class PageNotFoundException extends Exception{
 	
 }

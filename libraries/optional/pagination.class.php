@@ -8,15 +8,15 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/** Provides pagination links
- *
- * @license   : http://dispersion.inevy.com/license
- * @namespace : optional
- * @parent    : Dispersion
- * @file      : libraries/optional/pagination.class.php
- * @version   : 1.1
+ /**
+ * @version 1.2
+ * @author DinuSV
  */
 
+/** 
+ * @ingroup libraries
+ * @brief Provides automatic pagination generation. Modifies sql query to limit items.
+ */
 class Pagination extends Dispersion{
 	
 	private
@@ -25,27 +25,27 @@ class Pagination extends Dispersion{
 	 * Pagination links fields
 	 * ----------------------------------------- */
 	 
-	 	/** Total allowed links per page
-		 * 
-		 * @var integer
+	 	/** 
+		 * @var $pagination_links_per_page
+		 * int : Total allowed links per page
 		 */
 		$pagination_links_per_page   = 10,
 		
-	 	/** Attributes for the pagination link
-		 * 
-		 * @var array
+	 	/** 
+		 * @var $pagination_link_attr
+		 * array : Attributes for the pagination link
 		 */
 		$pagination_link_attr        = array(),
 		
-	 	/** Attributes for the active pagintion link
-		 * 
-		 * @var integer
+	 	/** 
+		 * @var $pagination_link_attr_active
+		 * int : Attributes for the active pagintion link
 		 */
 		$pagination_link_attr_active = array(),
 		
-	 	/** Path to the current page, without the counter
-		 * 
-		 * @var integer
+	 	/**
+		 * @var $pagination_link_href
+		 * int : Path to the current page, without the counter
 		 */
 		$pagination_link_href        = '',
 	
@@ -53,34 +53,34 @@ class Pagination extends Dispersion{
 	 * Select options
 	 * ----------------------------------------- */
 	 	
-	 	/** Page counting starts from 1
-		 * 
-		 * @var integer [1 ..]
+	 	/** 
+		 * @var $current_page
+		 * int : Page counting starts from 1
 		 */
 		$current_page = 1,
 		
-		/** Maximum number of items per page
-		 * 
-		 * @var integer
+		/** 
+		 * @var $items_per_page
+		 * int : Maximum number of items per page
 		 */
 		$items_per_page = 20,
 		
-		/** Total number of items
-		 * 
-		 * @param integer
+		/** 
+		 * @var $total_items
+		 * int : Total number of items
 		 */
 		$total_items = null,
 		
-		/** Selection query, can be either options, either string
-		 * 
-		 * @var string | array | null
+		/** 
+		 * @var $select_query
+		 * mixed : Selection query, can be either options, either string
 		 */
 		$select_query = null;
 	 
 	 public
-		/** Stores the number of pages the query has
-		 * 
-		 * @var integer
+		/** 
+		 * @var $total_pages
+		 * int : Stores the number of pages the query has
 		 */
 		$total_pages = null;
 	
@@ -170,7 +170,7 @@ class Pagination extends Dispersion{
 	
 	/** Sets the href the links will have
 	 * 
-	 * @param string $pagepath
+	 * @param string $page_path
 	 * 
 	 * @return Pagination          : current object
 	 */
@@ -288,6 +288,9 @@ class Pagination extends Dispersion{
 		if ( $this->total_pages >= 1 ) echo $this->anchorLink( $this->current_page, true );
 	}
 	
+	/** 
+	 * @return total pages either set or received by query
+	 */
 	public function getTotalPages(){
 		if ( $this->total_pages === null ){
 			if ( $this->total_items === null ) 

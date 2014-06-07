@@ -8,14 +8,15 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/** Thrown when a required form field is empty.
- *
- * @license   : http://dispersion.inevy.com/license
- * @namespace : exceptions
- * @file      : libraries/exceptions/emptyfieldexception.class.php
- * @version   : 1.0
+/**
+ * @version 1.1
+ * @author DinuSV
  */
- 
+
+/** 
+ * @ingroup exceptions
+ * @brief Thrown when a required form field is empty.
+ */
 class EmptyFieldException extends Exception{
 	
 }

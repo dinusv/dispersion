@@ -8,19 +8,30 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/**  Database abstraction, containing all the defined methods
- * 
- * @license     : http://dispersion.inevy.com/license
- * @namespace   : database
- * @file        : libraries/database/Database.php
- * @extends     : Dispersion
- * @version     : 1.0
+/**
+ * @version 1.1
+ * @author DinuSV
  */
 
+/** 
+ * @ingroup database
+ * @brief Database MySql connection
+ * 
+ * Connects to a mysql database. Also a wrapper for php's connection resource.
+ */
 class DatabaseConnectionMysql extends DatabaseConnection{
 	
 	private 
+		/**
+		 * @var $_connected
+		 * bool : is set to true once the connection is established
+		 */
 		$_connected     = false,
+		
+		/**
+		 * @var $_connection
+		 * resource : mysql connection
+		 */
 		$_connection    = NULL;
 	
 	
@@ -31,9 +42,9 @@ class DatabaseConnectionMysql extends DatabaseConnection{
 		$this->connect($db_settings['database'], $db_settings['host'], $db_settings['user'], $db_settings['password']);
 	}
 	
-	/** Connect to mysql database 
-	 * 
-	 * @override
+	/** 
+	 * Connect to mysql database
+	 * Overrides DatabaseConnection::connect( $base, $server, $user, $pass )
 	 * 
 	 * @param string $base   : the database to connect to
 	 * @param string $server : the server name
@@ -50,6 +61,9 @@ class DatabaseConnectionMysql extends DatabaseConnection{
 		}
 	}
 	
+	/**
+	 * @return true if connected, false otherwise
+	 */
 	public function connected(){
 		return $this->_connected;
 	}

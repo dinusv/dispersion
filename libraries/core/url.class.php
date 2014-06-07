@@ -8,65 +8,70 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/** Contains url related fields and methods
- * 
- * @license     : http://dispersion.inevy.com/license
- * @namespace   : core
- * @file        : libraries/url.class.php
- * @version     : 1.0
+/**
+ * @version 1.1
+ * @author DinuSV
  */
- 
+
+ /**
+  * @ingroup core
+  * @brief Url manager.
+  *  
+  * Routing, redirection methods, url composition and other responsibilities of
+  * a url manager.
+  */
 class Url{
 	
 	public 
-		/** Name of the controller in use
-		 * 
-		 * @var string
+		/**
+		 * @var $controller
+		 * string : Name of the controller in use
 		 */
 		$controller = null,
 		
-		/** Method of controller in use
-		 * 
-		 * @var string
+		/** 
+		 * @var $action
+		 * string : Method of controller in use
 		 */
 		$action     = null,
 		
-		/** Base url set in config file
-		 * 
-		 * @var string
+		/** s
+		 * @var $config_url
+		 * string : Base url set in config file
 		 */
 		$config_url = null,
 		
-		/** Custom urls
-		 * 
-		 * @var array
+		/** 
+		 * @var $custom
+		 * array : Custom urls
 		 */
 		$custom     = array(),
 		
-		/** Params set to the current method of the controller
-		 * 
-		 * @var array
+		/**
+		 * @var $params
+		 * array : Params set to the current method of the controller
 		 */
 		$params     = array();
 		
 	private
-		/** Temporary link to link to
-		 * 
-		 * @var string
+		/** 
+		 * @var $link
+		 * string : Temporary link to link to
 		 */
 		$link = '';
 		
 	private static
-		/** Singleton instance
-		 * 
-		 * @var Url
+		/** 
+		 * @var $instance
+		 * Url : Singleton instance
 		 */
 		$instance = null;
 	
 	/** Singleton class
 	 * 
-	 * @param string $url                : the current url
-	 * @param string $default_controller : the default controller set in the configuration
+	 * @param $url string                : the current url
+	 * @param $default_controller string : the default controller set in the configuration
+	 * @param $custom_url array          : custom url
 	 */
 	public static function getInstance( $url = '', $default_controller = '', $custom_url = array() ){
 		if ( self::$instance === null ) self::$instance = new self( $url, $default_controller, $custom_url );
@@ -108,9 +113,9 @@ class Url{
 	
 	/** Link to a page
 	 * 
-	 * @param string $controller : the controller to link to
-	 * @param string $action     : optional
-	 * @param array/string $args : optional, arguments to be added
+	 * @param $controller string : the controller to link to
+	 * @param $action string     : optional
+	 * @param $args array/string : optional, arguments to be added
 	 * 
 	 * @return Url object
 	 */
@@ -128,7 +133,7 @@ class Url{
 	
 	/** Link to an external page
 	 * 
-	 * @param string $link
+	 * @param $link string
 	 * 
 	 * @return Url         : current object
 	 */
@@ -148,7 +153,7 @@ class Url{
 	
 	/** Simple page redirect.
 	 * 
-	 * @param string location
+	 * @param $location string
 	 */
 	public function redirect( $location = '' ){
 		if ( $location === '' ) $location = $this->__toString();
@@ -157,7 +162,7 @@ class Url{
 	
 	/** Redirect using javascript ( can be used if headers are already sent )
 	 * 
-	 * @param string location
+	 * @param $location string
 	 */
 	public function jsRedirect( $location = '' ){
 		if ( $location === '' ) $location = $this->__toString();
@@ -166,8 +171,9 @@ class Url{
 	
 	/** Creates a friendly title url
 	 * 
-	 * @param string $title      : the title
-	 * @param boolean $lowercase : if true, the title will converted to lowercase
+	 * @param $title string      : the title
+	 * @param $lowercase boolean : if true, the title will converted to lowercase
+	 * 
 	 * @return string            : the new title
 	 */
 	public function fromTitle( $title, $lowercase = false ){
@@ -186,13 +192,14 @@ class Url{
 		foreach ( $trans as $key => $val ){
 			$title = preg_replace( "#" . $key . "#i", $val, $title );
 		}
-		if ( $lowercase ) $title = strtolower( $title );
+		if ( $lowercase )
+			$title = strtolower( $title );
 		return trim( stripslashes($title ) );
 	}
 	
 	/** Check if the connection is SSL
 	 * 
-	 * @return boolean
+	 * @return bool
 	 */
 	public function isSSL(){
 		if ( !isset( $_SERVER['HTTPS'] ) )       return false;

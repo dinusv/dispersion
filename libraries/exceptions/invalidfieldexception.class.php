@@ -7,18 +7,23 @@
 |                                                   |
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
-
-/** Thrown when trying to access an index of an array that is not set.
- *
- * @license   : http://dispersion.inevy.com/license
- * @namespace : exceptions
- * @file      : libraries/exceptions/invalidfieldexception.class.php
- * @version   : 1.0
- */
  
+/**
+ * @version 1.1
+ * @author DinuSV
+ */
+
+/** 
+ * @ingroup exceptions
+ * @brief Thrown when validating an incorrect form
+ */
 class InvalidFieldException extends Exception{
 	
 	protected static
+		/**
+		 * @var $messages
+		 * array : map of field required-types and their messages
+		 */
 		$messages = array(
 			FormValidation::REQUIRED       => 'This field is required',
 			FormValidation::MINIMUM_LENGTH => 'Field must be at least %required characters long',
@@ -37,16 +42,19 @@ class InvalidFieldException extends Exception{
 		);
 	
 	private
-		/** Name of the field the exception was thrown for
-		 * 
-		 * @var string
+		/** 
+		 * @var $field_name
+		 * string : Name of the field the exception was thrown for
 		 */
 		$field_name;
 	
 	/** Constructor
 	 * 
-	 * @param string $message    : [optional] message to output
+	 * @param string $message_code    : [optional] message to output
 	 * @param string $field_name : [optional] name of the field the exception was thrown for
+	 * @param string $required_value : [optional]
+	 * @param int $code              : [optional]
+	 * @param Exception $previous    : [optional]
 	 * @see php exception
 	 */
 	public function InvalidFieldException( $message_code, $field_name = null, $required_value = '', $code = 0, Exception $previous = null) {

@@ -8,53 +8,69 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/** Main error handling class
- *
- * @license   : http://dispersion.inevy.com/license
- * @namespace : optional
- * @parent    : Dispersion
- * @file      : libraries/optional/error.class.php
- * @version   : 1.0
+ /**
+ * @version 1.2
+ * @author DinuSV
  */
 
+/** 
+ * @ingroup libraries
+ * @brief Html form file upload manager.
+ */
 class FileUpload extends Dispersion{
 	
 	const
+		/** Maximum size defined by ini file error
+		 */
 		INI_MAX_SIZE  = 0,
+		/** Maximum size defined by form error
+		 */
 		FORM_MAX_SIZE = 1,
+		/** Incomplete / Interrupted upload
+		 */
 		INCOMPLETE    = 2,
+		/** File required, yet field was empty
+		 */
 		REQUIRED      = 3,
+		/** File exceeds the set maximum size
+		 */
 		MAX_SIZE      = 4,
+		/** File is smaller than the set minimum size
+		 */
 		MIN_SIZE      = 5,
+		/** Invalid file type
+		 */
 		TYPE          = 6,
+		/** Unknown upload file problem
+		 */
 		UNKNOWN       = 7;
-	
+
 	/* 
 	 * Restriction fields
 	 * ----------------------------------------- */
 	 
 	private
-		/** Restrict maximum size of uploaded files in bytes
-		 * 
-		 * @var integer
+		/** 
+		 * @var $restrict_size_max
+		 * int : Restrict maximum size of uploaded files in bytes
 		 */
 		$restrict_size_max,
 		
-		/** Restrict minimum size of uploaded files in bytes
-		 * 
-		 * @var integer
+		/** 
+		 * @var $restrict_size_min
+		 * int : Restrict minimum size of uploaded files in bytes
 		 */
 		$restrict_size_min,
 		
-		/** Restrict allowed types of uploaded files
-		 * 
-		 * @var array
+		/** 
+		 * @var $restrict_type
+		 * array : Restrict allowed types of uploaded files
 		 */
 		$restrict_type,
 		
-		/** Add required fields
-		 * 
-		 * @var array
+		/** 
+		 * @var $required_files
+		 * array : Add required fields
 		 */
 		$required_files;
 	
@@ -63,9 +79,9 @@ class FileUpload extends Dispersion{
 	 * ----------------------------------------- */
 	 
 	public
-		/** Files that have been uploaded succesfully
-		 * 
-		 * @var array
+		/** 
+		 * @var $upload_success
+		 * array : Files that have been uploaded succesfully
 		 */
 		$upload_success = array();
 	
@@ -84,8 +100,8 @@ class FileUpload extends Dispersion{
 	 
 	/** Restrict file size in bytes
 	 * 
-	 * @param integer $min
-	 * @param integer $max
+	 * @param int $min
+	 * @param int $max
 	 */
 	public function restrictSize( $min = null, $max = null ){
 		$this->restrict_size_min = $min;
@@ -95,7 +111,7 @@ class FileUpload extends Dispersion{
 	
 	/** Restrict file type
 	 * 
-	 * @param string/array $type : type of files allowed
+	 * @param $type string/array : type of files allowed
 	 */
 	public function restrictType( $type ){
 		if ( is_array($type) ){
@@ -108,7 +124,9 @@ class FileUpload extends Dispersion{
 	
 	/** Files that are required for upload
 	 * 
-	 * @param string/array $file : file names that are required
+	 * @param string-array $file : file names that are required
+	 * 
+	 * @return current object
 	 */
 	public function requiredFiles( $file = array() ){
 		if ( is_array($file) ){

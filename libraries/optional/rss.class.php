@@ -8,50 +8,127 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/**
- * @license   : http://dispersion.inevy.com/license
- * @namespace : optional
- * @file      : libraries/optional/rss.class.php
- * @requires  : class Tag
- * @version   : 1.1
- */ 
- 
+ /**
+ * @version 1.2
+ * @author DinuSV
+ */
+
+/** 
+ * @ingroup libraries
+ * @brief Rss file wrapper.
+ * 
+ * The first thing when creating an rss file is setting up a channel ( Rss::setChannel ). The channel 
+ * would next require tags of different types : title, link, description, language, item, copyright, 
+ * managingEditor, webMaster, pubDate, lastBuiltDate, category, generator, docs, cloud, ttl, image, 
+ * rating, textInput, skipHours, skipDays, image, cloud. 
+ * 
+ * Here's an example of a small rss file :
+ * 
+ * @code
+ * $rss = new Rss();
+ * $rss->setChannel(
+ *     'Rss feed title',
+ *     'http://link-to-rss-feed',
+ *     'Rss feed description'
+ * );
+ * 
+ * // Create a pubDate tag
+ * $pubDate = new Tag('pubDate');
+ * $pubDate->append( date("D, d M Y H:i:s T") );
+ *  
+ * // Add tag to Rss
+ * $rss->addChannelValue( $pubDate );
+ * @endcode
+ * 
+ * Adding unsupported values will result in an InvalidArgumentTypeException. To support more values, 
+ * namespaces need to be added :
+ * 
+ * @code
+ * // Adding the follwing namespace will allow you to add 'sy' type tags
+ * $rss->addNameSpace( 'xmlns:sy', 'http://purl.org/rss/1.0/modules/syndication/' );
+ * 
+ * $updatePeriod = new Tag('sy:updatePeriod');
+ * $updatePeriod->append('hourly');
+ * $rss->addChannelValue( $updatePeriod );
+ * @endcode
+ * 
+ * ## Adding items
+ * 
+ * Items contain the actual feed data. They are also added as channel values. An item is required to have
+ * at least a title or content. Rss::newItem creates a new tag item. To add just one of the parameters, 
+ * set the other one to 'null'. If both are null, an InvalidArgumentTypeException will be thrown.
+ * 
+ * @code
+ * // Add item with set title
+ * $rss->addChannelValue( $rss->newItem( 'My Feed', null ) );
+ *  
+ * // Add item with set content
+ * $rss->addChannelValue( $rss->newItem( null, 'About my feed' ) );
+ *  
+ * // Custom values can also be added to items
+ * $pubDate = new Tag('pubDate');
+ * $pubDate->append( date("D, d M Y H:i:s T" );
+ * $item = $rss->newItem( 'My feed', 'About My Feed' );
+ * $item->append( $pubDate );
+ * $rss->addChannelValue( $item );
+ * @endcode
+ * 
+ * Images and text input fields can also be created : 
+ * 
+ * @code
+ * $rss->addChannelValue( $rss->newImage( 'myImage.jpg', 'My Image', 'http://image-href' ) );
+ * $rss->addChannelValue( $rss->newTextInput( 'My Label', 'About My Input', 'name', 'http://submit' ) );
+ * @endcode
+ * 
+ * ## Saving data
+ * 
+ * The object can either be echoed out, or written to a file :
+ * 
+ * @code
+ * // Output content on screen
+ * echo $rss;
+ *  
+ * // Output content to a file
+ * $rss->outputToFile( 'rssFile.rss' );
+ * @endcode
+ * 
+ */
 class Rss{
 	
 	private 
-		/** Rss header
-		 * 
-		 * @var string
+		/** 
+		 * @var $xml
+		 * string : Rss header
 		 */
 		$xml,
 		
-		/** Rss main tag
-		 * 
-		 * @var Tag
+		/** 
+		 * @var $rss
+		 * Tag : Rss main tag
 		 */
 		$rss,
 		
-		/** Channel tag
-		 * 
-		 * @var Tag
+		/** 
+		 * @var $channel
+		 * Tag : Channel tag
 		 */
 		$channel,
 		
-		/** Allowed nested items for the channel tag
-		 * 
-		 * @var array
+		/** 
+		 * @var $channel_allowed_items
+		 * array : Allowed nested items for the channel tag
 		 */
 		$channel_allowed_items = array(),
 		
-		/** Added namespaces
-		 * 
-		 * @var array
+		/** 
+		 * @var $namespaces
+		 * array : Added namespaces
 		 */
 		$namespaces = array(),
 		
-		/** Channel tag items
-		 * 
-		 * @var array
+		/** 
+		 * @var $items
+		 * array : Channel tag items
 		 */
 		$items = array();
 	
@@ -143,7 +220,7 @@ class Rss{
 	/** Create a new rss image field
 	 * 
 	 * @param string $url
-	 * @param string $description
+	 * @param string $title
 	 * @param string $link
 	 * @param string $width       : optional
 	 * @param string $height      : optional

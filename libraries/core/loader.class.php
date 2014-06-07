@@ -7,59 +7,63 @@
 |                                                   |
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
-
-/**  Manages the config file, loads classes and parses the url
- * 
- * @license     : http://dispersion.inevy.com/license
- * @namespace   : core
- * @file        : libraries/core/Loader.php
- * @version     : 1.0
+ 
+/**
+ * @version 1.1
+ * @author DinuSV
  */
 
+ /** 
+  * @ingroup core
+  * @brief Manages the config file, loads required classes and parses the url
+  *  
+  * This is the main Dispersion Loader, where all modules and components are
+  * loaded.
+  */
 class Loader {
 	
 	private
-		/** Url of the current page
-		 * 
-		 * @var string
+		/** 
+		 * @var $url
+		 * string : Url of the current page
 		 */
 		$url = '',
 		
-		/** Config object
-		 * 
-		 * @var Config
+		/** 
+		 * @var $config
+		 * Config : Config object
 		 */
 		$config = null,
 		
-		/** Locations for the frameworks files
-		 * 
-		 * @var array
+		/** 
+		 * @var $locations
+		 * array : Locations for the frameworks files
 		 */
 		$locations = array();
 
 	private static
-		/** Object used for displaying errors, exceptions and debugging information
-		 * 
-		 * @var Debug
+		/** 
+		 * @var $debug
+		 * Debug : Object used for displaying errors, exceptions and debugging information
 		 */
 		$debug,
 		
-		/** Object for handling errors
-		 * 
-		 * @var Error
+		/** 
+		 * @var $error
+		 * Error : Object for handling errors
 		 */
 		$error,
 		
-		/** Object for handling class autoload
-		 *
-		 * @var Autoload
+		/** 
+		 * @var $autoload
+		 * Autoload : Object for handling class autoload
 		 */
 		$autoload;
 		
 	public static
-		/** Minimum required version of php
-		 * 
-		 * @var string
+		/** 
+		 * @var $required_version
+		 * string : Minimum required version of php
 		 */
 		$required_version = '5.2.4';
 	
@@ -131,7 +135,7 @@ class Loader {
 		
 	}
 	
-	/* Set up error handling
+	/** Set up error handling
 	 */
 	private function setErrorHandling(){
 		$errorconfig = $this->config->getErrorSettings();
@@ -148,7 +152,7 @@ class Loader {
 		set_exception_handler(array( &self::$error, "exceptionHandler") );
 	}
 	
-	/* Set up the autoload class
+	/** Set up the autoload class
 	 */
 	private function setAutoLoad(){
 		self::$autoload = AutoLoad::getInstance();
@@ -159,7 +163,7 @@ class Loader {
 		));
 	}
 	
-	/* Parses the url and calls the given method
+	/** Parses the url and calls the given method
 	 */
 	public function callUrl(){
 		define( 'BASEPATH', $this->config->getBaseUrl() );
@@ -202,6 +206,8 @@ class Loader {
 						throw new PageNotFoundException();
 				try {
 					$callMethod->invokeArgs( $dispatch, $url->params );
+				} catch ( PageNotFoundException $e ){
+					throw $e;
 				} catch ( Exception $e ){
 					self::$debug->exception( $e );
 				}

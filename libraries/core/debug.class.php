@@ -9,70 +9,97 @@
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
 /**
- * @license   : http://dispersion.inevy.com/license
- * @namespace : core
- * @file      : libraries/debug.class.php
- * @version   : 1.0
+ * @version 1.1
+ * @author DinuSV
  */
 
+ /** 
+  * @ingroup core
+  * @brief Offers support for debugging php errors, displaying variables, and other messages
+  * within a web application. All these features are turned off when the website enters
+  * production mode.
+  *  
+  * To debug variables, just use variable( $var, $level = 0 ) function : 
+  * 
+  * @code
+  * $example = 20;
+  * $this->debug->variable($example);
+  * @endcode
+  * 
+  * Array-type variables can be structured into a multi-level ierarchy. Sometimes extending
+  * them in order to visualize all their fields can become ugly due to their huge size. This
+  * is where the $level parameter comes into play. You can limit the display of an array to
+  * a certain number of levels, by setting the level parameter.
+  * 
+  * @code
+  * $example = array(
+  * 	'one' => 1,
+  * 	'two' => 2,
+  * 	'twoext' => array('twoA' => 20, 'twoB' => 21)
+  * );
+  * $this->debug->variable($example, 2); // shows 2 of it's subarrays( in this case all )
+  * $this->debug->varialbe($example, 1); // shows only the main array ( 'one', 'two' )
+  * @endcode
+  * 
+  */
 class Debug{
 	
 	protected
-		/** Maps color of header with different error types
-		 * 
-		 * @var array
+		/** 
+		 * @var $debug_head_color
+		 * array : Maps color of header with different error types
 		 */
 		$debug_head_color = array(),
 		
-		/** Style of the div containing the message
-		 * 
-		 * @var string
+		/**
+		 * @var $debug_div_style
+		 * string : Style of the div containing the message
 		 */
 		$debug_div_style,
 		
-		/** Style of the title of the div containing the message
-		 * 
-		 * @var string
+		/**
+		 * @var $debug_h1_style
+		 * string : Style of the title of the div containing the message
 		 */
 		$debug_h1_style,
 		
-		/** Stype of the paragraph containing the message
-		 * 
-		 * @var string
+		/** 
+		 * @var $debug_p_style
+		 * string : Stype of the paragraph containing the message
 		 */
 		$debug_p_style;
 	
 	private
-		/** The stage of the project, set from the config file, 
-		 * 
-		 * @var boolean
+		/** 
+		 * @var $dev_stage
+		 * bool : The stage of the project, set from the config file
 		 */
 		$dev_stage,
 		
-		/** Log exceptions setting, set from the config file
-		 * 
-		 * @var boolean
+		/** 
+		 * @var $log_exceptions 
+		 * bool : Log exceptions setting, set from the config file
 		 */
 		$log_exceptions,
 		
-		/** File to log exceptions to, set from the config file
-		 * 
-		 * @var string
+		/**
+		 * @var $log_exceptions_file
+		 * string : File to log exceptions to, set from the config file
 		 */
 		$log_exceptions_file;
 	
 	private static
-		/** Singleton instance
-		 * 
-		 * @var Debug
+		/**
+		 * @var $instance
+		 * Debug : Singleton instance
 		 */
 		$instance = null;
 	
 	/** Singleton class
 	 * 
-	 * @param boolean $dev_stage           : true, if it's development stage
-	 * @param boolean $log_exceptions      : true, if exceptions should be logged       
-	 * @param string  $log_exceptions_file : path to the log file
+	 * @param $dev_stage boolean            : true, if it's development stage
+	 * @param $log_exceptions boolean       : true, if exceptions should be logged       
+	 * @param $log_exceptions_file string   : path to the log file
 	 */
 	public static function getInstance( $dev_stage = true, $log_exceptions = '', $log_exceptions_file = '' ){
 		if ( self::$instance === null ) self::$instance = new self( $dev_stage, $log_exceptions, $log_exceptions_file );
@@ -108,7 +135,7 @@ class Debug{
 	
 	/** Display message helper. Gets the header color
 	 * 
-	 * @param string $level : the level of the error
+	 * @param $level string : the level of the error
 	 * 
 	 * @return string       : header color
 	 */
@@ -120,8 +147,8 @@ class Debug{
 	
 	/** Display message
 	 * 
-	 * @param string/array $msg : the message(s) to be displayed
-	 * @param string $level     : type of message(s) to be displayed
+	 * @param $msg string/array : the message(s) to be displayed
+	 * @param $level string     : type of message(s) to be displayed
 	 */
 	public function display( $msg = 'Unknown', $level = 'debug' ){
 		if ( $this->dev_stage === 'development' ){
@@ -139,8 +166,8 @@ class Debug{
 	/** Helper for printing variables : uses a recursive approach to show the variable contents
 	 * 
 	 * @param $var           : in case of array or object passes it recursively
-	 * @param string $name   : used in case of a recursive approach
-	 * @param numeric $level : number of recursive approaches
+	 * @param $name string   : used in case of a recursive approach
+	 * @param $level numeric : number of recursive approaches
 	 * 
 	 * @return array         : strings containing the specified variables contents, each key on one line 
 	 */

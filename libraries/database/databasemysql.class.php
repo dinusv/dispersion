@@ -8,51 +8,53 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/**  Executes mysql queries, connects to the mysql database, has debugging
- * 
- * @license   : http://dispersion.inevy.com/license
- * @namespace   : database
- * @file        : libraries/database/DataBaseMySql.php
- * @extends     : DataBase
- * @version     : 1.0
+/**
+ * @version 1.1
+ * @author DinuSV
  */
- 
+
+/** 
+ * @ingroup database
+ * @brief Database MySql connection
+ * 
+ * Executes mysql queries, offers query debugging and advanced query error management.
+ */
 class DataBaseMySql extends Dispersion{
 	
 	private
-		/** Connection to the mysql server
-		 * 
-		 * @var resource
+		/** 
+		 * @var $_connection
+		 * resource : Connection to the mysql server
 		 */
 		$_connection = null,
 		
-		/** Debug tables
-		 * 
-		 * @var boolean
+		/** 
+		 * @var $defaultDebug
+		 * bool : Debug tables
 		 */
 		$defaultDebug,
 		
-		/** Total number of queries executed
-		 * 
-		 * @var integer
+		/** 
+		 * @var $nr_queries
+		 * int : Total number of queries executed
 		 */
 		$nr_queries,
 		
-		/** Result of the last query executed
-		 * 
-		 * @var resource
+		/** 
+		 * @var $last_result
+		 * resource : Result of the last query executed
 		 */
 		$last_result,
 		
-		/** Affected rows of the last query executed
-		 * 
-		 * @var integer
+		/** 
+		 * @var $sql_affected_rows
+		 * int : Affected rows of the last query executed
 		 */
 		$sql_affected_rows;
 	
 	/** Constructor
 	 * 
-	 * @param boolean $debug : true if table debugging is enabled
+	 * @param $db_connection DatabaseConnection : Database connection
 	 */
 	public function DataBaseMySql( $db_connection ){
 		parent::__construct();

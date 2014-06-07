@@ -9,26 +9,29 @@
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
 /**
- * @license   : http://dispersion.inevy.com/license
- * @namespace : core
- * @parent    : Dispersion
- * @file      : libraries/controller.class.php
- * @requires  : libraries/template.class.php, libraries/url.class.php
- * @version   : 1.0
+ * @version 1.1
+ * @author DinuSV
  */
 
+ /** 
+  * @ingroup core
+  * @brief Base for all application controllers.
+  *  
+  * Extends the main Dispersion class, therefore provides access to all autoloaded
+  * libraries. 
+  */
 class Controller extends Dispersion {
 	
 	protected
-		/** Contains the template object
-		 * 
-		 * @var Template
+		/** 
+		 * @var $template
+		 * Template : Contains the template object
 		 */
 		$template,
 		
-		/** Contains the url object
-		 * 
-		 * @var Url
+		/** 
+		 * @var $url
+		 * Url : Contains the url object
 		 */
 		$url;
 	
@@ -55,7 +58,8 @@ class Controller extends Dispersion {
 		$this->before();
 	}
 	
-	/** Hook to extend in controllers.
+	/** 
+	 * Hook to extend in controllers.
 	 */
 	protected function before() {}
 	

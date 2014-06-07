@@ -8,19 +8,29 @@
 | Copyright 2010-2013 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/**  Database abstraction, containing all the defined methods
- * 
- * @license     : http://dispersion.inevy.com/license
- * @namespace   : database
- * @file        : libraries/database/Database.php
- * @extends     : Dispersion
- * @version     : 1.0
+/**
+ * @version 1.1
+ * @author DinuSV
  */
 
+/** 
+ * @ingroup database
+ * @brief Database abstraction, containing all the defined methods
+ */
 abstract class DatabaseConnection{
 	
 	private 
+		/**
+		 * @var $_debug_queries
+		 * bool : true if query-debug is enabled
+		 */
 		$_debug_queries = false,
+		
+		/**
+		 * @var $_table_prefix
+		 * string : In case the database contains tables from other web applications, it's good practice to add a common
+		 * prefix to all tables used within this application
+		 */
 		$_table_prefix  = '';
 	
 	/** Constructor
@@ -30,10 +40,8 @@ abstract class DatabaseConnection{
 		$this->_table_prefix  = $db_settings['table_prefix'];
 	}
 		
-	/** Connect to mysql database 
-	 * 
-	 * @override
-	 * 
+	/**  
+	 * Connection method
 	 * @param string $base   : the database to connect to
 	 * @param string $server : the server name
 	 * @param string $user   : user for the database

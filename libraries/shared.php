@@ -9,11 +9,9 @@
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
 /** 
- * @license : http://dispersion.inevy.com/license
- * @file    : libraries/shared.php
- * @version : 1.0 
+ * @author DinuSV
+ * @version : 1.1
  */
-
 
 /* Set up locations */
 

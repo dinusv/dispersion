@@ -8,33 +8,32 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/**
- * @license   : http://dispersion.inevy.com/license
- * @namespace : optional
- * @file      : libraries/optional/session.class.php
- * @extends   : Dispersion
- * @version   : 1.0 
+ /**
+ * @version 1.2
+ * @author DinuSV
  */
 
+/** 
+ * @ingroup libraries
+ * @brief User session manager.
+ */
 class Session extends Dispersion {
 	
 	const
-		/** Predefined password field
-		 * 
-		 * @var string
+		/** 
+		 * string : Predefined password field
 		 */
 		PASSWORD_FIELD = 'password',
 		
-		/** Predefined last_used field
-		 * 
-		 * @var string
+		/** 
+		 * string : Predefined last_used field
 		 */
 		LASTUSED_FIELD = 'last_used';
 	
 	protected
-		/** Table to restore in the model after the class finishes working with the model.
-		 * 
-		 * @var string
+		/** 
+		 * @var $_table_restore
+		 * string : Table to restore in the model after the class finishes working with the model.
 		 */
 		$_table_restore,
 	
@@ -42,31 +41,33 @@ class Session extends Dispersion {
 	 * Configuration fields
 	 * ----------------------------------------- */
 		
-		/** Table used for holding user data.
-		 * 
-		 * @var string
-		 * @example table = 'users'
+		/** 
+		 * @var $_table
+		 * string : Table used for holding user data.
+		 * Example : table = 'users'
 		 */
 		$_table,
 		
-		/** Map table columns with predefined fields. There are 2 predefined fields, 'password' and
+		/** 
+		 * @var $_table_column
+		 * array : Map table columns with predefined fields. There are 2 predefined fields, 'password' and
 		 * 'last_used'. The 'password' field is used to alert the session class to encrypt data before 
 		 * matching it with the table field, and the 'last_used' stores the last time the user has logged in.
 		 * 
-		 * @var array
-		 * @example $_table_column = array( 'password' => 'mypassword', 'last_used' => 'last_login' )
+		 * Example : $_table_column = array( 'password' => 'mypassword', 'last_used' => 'last_login' )
 		 */
 		$_table_column = array(),
 		
-		/** Map table data with the $_SESSION variables. Each key represents the name of session key to
+		/** 
+		 * 
+		 * @var $_session_keys
+		 * array : Map table data with the $_SESSION variables. Each key represents the name of session key to
 		 * hold the data retrieved from the table, and the value represents the table column to get
 		 * the data from.
 		 * 
-		 * @var array
-		 * @example
-		 *      The following will make the password and the id of the user available in the $_SESSION
-		 *      variables ( $_SESSION['pwd'] = 'some password', $_SESSION['id'] = '1234' )
-		 *      $_session_keys = array( 'pwd' => 'password', 'id' => 'id' )
+		 * Example : The following will make the password and the id of the user available in the $_SESSION
+		 * variables ( $_SESSION['pwd'] = 'some password', $_SESSION['id'] = '1234' )
+		 * $_session_keys = array( 'pwd' => 'password', 'id' => 'id' )
 		 */
 		$_session_keys = array(),
 	
@@ -74,22 +75,22 @@ class Session extends Dispersion {
 	 * Session storage
 	 * ----------------------------------------- */
 	 	
-	 	/** Set this to true if you want to enable sessions to be stored in a database instead of a file
+	 	/** 
+		 * @var $_use_db
+		 * bool : Set this to true if you want to enable sessions to be stored in a database instead of a file
 		 * in the system( linux stores them in the 'tmp' directory by default ). If you set this to true,
 		 * you also need to set the table in which the sessions will be stored.
-		 * 
-		 * @var boolean
 		 */
 		$_use_db = false,
 		
-		/** Table to store sessions in. Before using this, you need to enable session storage in a database,
+		/** 
+		 * @var $_session_table
+		 * string : Table to store sessions in. Before using this, you need to enable session storage in a database,
 		 * by using the field ( $_use_db ) above. The table must have the following columns and respect
 		 * their properties :
 		 *     sid : CHAR(32), PRIMARY
 		 *     expiration : INT NOT NULL
 		 *     value : TEXT NOT NULL
-		 * 
-		 * @var string
 		 */
 		$_session_table = '',
 	
@@ -97,15 +98,15 @@ class Session extends Dispersion {
 	 * Password encryption
 	 * ----------------------------------------- */
 	
-		/** Algorithm to be used. By default, blowfish is selected with : $2a
-		 * 
-		 * @var string
+		/** 
+		 * @var $_algo
+		 * string : Algorithm to be used. By default, blowfish is selected with : $2a
 		 */
 		$_algo = '$2a',
 		
-		/** Number of times the encryption algorithm is used. Default : $10
-		 * 
-		 * @var string
+		/** 
+		 * @var $_cost
+		 * string : Number of times the encryption algorithm is used. Default : $10
 		 */
 		$_cost = '$10';
 	
@@ -151,7 +152,7 @@ class Session extends Dispersion {
 	
 	/** Get value from the session
 	 * 
-	 * @param string/numeric $key : index from which to return the value
+	 * @param string $key  : index from which to return the value
 	 * 
 	 * @return mixed
 	 * 
@@ -165,7 +166,8 @@ class Session extends Dispersion {
 	
 	/** Set the value at the key specified
 	 * 
-	 * @param string/numeric $key : index to set the value to
+	 * @param string-numeric $key : index to set the value to
+	 * @param mixed $value : value to set
 	 */
 	public function setvalueAt( $key, $value ){
 		$_SESSION[$key] = $value;
@@ -250,7 +252,7 @@ class Session extends Dispersion {
 				if ( $have_pwd )
 					if ( $row->$password_row !== $this->generatePass( $password_field, substr( $row->$password_row, 0, 29 ) ) ) 
 						return $this->restoreAndReturn( false );
-				if ( !isset( $_SESSION ) ) session_start();
+				if ( session_id() == '' ) session_start();
 				foreach( $this->_session_keys as $key => $value ){
 					$_SESSION[$key] = $row->$value;
 				}
@@ -272,23 +274,19 @@ class Session extends Dispersion {
 	 * @return boolean : true if the session exists and is valid, false otherwise
 	 */
 	public function checkSession(){
-		if ( !isset( $_SESSION ) ) session_start();
-		$query = array();
+		if ( session_id() == '' ) session_start();
 		if ( count($_SESSION) === 0 ) return $this->restoreAndReturn(0);
 		foreach( $this->_session_keys as $key => $value ){
-			if ( isset( $_SESSION[$key] ) ){
-				$query[$value] = $_SESSION[$key];
-			} else return $this->restoreAndReturn( false );
+			if ( !isset( $_SESSION[$key] ) )
+				return $this->restoreAndReturn(0);
 		}
-		$row = $this->model->setTable( $this->_table )->selectRow($query);
-		if ( $row ) return $this->restoreAndReturn( true );
-		else return $this->restoreAndReturn( false );
+		return $this->restoreAndReturn(true);
 	}
 	
 	/** Ends the session
 	 */
 	public function endSession(){
-		if ( !isset( $_SESSION ) ) session_start();
+		if ( session_id() == '' ) session_start();
 		/* unset variables */
 		$_SESSION = array();
 		/* delete the session cookie */

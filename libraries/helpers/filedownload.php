@@ -8,30 +8,104 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/**
- * @license   : http://dispersion.inevy.com/license
- * @namespace : helpers
- * @file      : libraries/helpers/cookie.php
- * @version   : 1.0
+ /**
+ * @version 1.2
+ * @author DinuSV
  */
- 
+
+/** 
+ * @ingroup helpers
+ * @brief Outputs file contents directly to browser, hiding the actual path of the file. 
+ * 
+ * The use of this class comes into play when one wants to hide the actual path to the file or restrict
+ * access to it by unknown sources.
+ * 
+ * The constructor takes 2 argument : the path to the file, and the file name to display when downloading.
+ * If the second argument is not given, the name displaed will be hte same as the original name. The 
+ * `output()` function will display the file to the browser for download.
+ * 
+ * @code
+ * $dl = new FileDownload( ROOT . '/myarchive.zip', 'My Collection.zip' );
+ * $dl->output();
+ * @endcode
+ * 
+ * You can also set the name of the file after the object was created, using `setFileName()` :
+ * 
+ * @code
+ * $dl = new FileDownload( ROOT . '/myarchive.zip' );
+ * $dl->setFileName( 'My Collection.zip' )->output();
+ * @endcode
+ * 
+ * By default, the mime type is deducted from the file extension ( The mime type is the value the browser 
+ * needs in order to know what to do with the file ). The following extensions are known : zip, pdf, doc,
+ * xls, ppt, exe, gif, png, jpg, jpeg, mp3, wav, mpeg, mpg, mpe, mov, avi. In order to add more extensions 
+ * and their mime type, you can use the `addExtension()` function, and in order to remove them, you can
+ * use the `removeExtension()` function : 
+ * 
+ * @code
+ * $dl = new FileDownload( 'myarchive.zip' );
+ * $dl->removeExtension( 'zip' );
+ * $dl->addExtension( 'zip', 'application/zip' );
+ * @endcode
+ * 
+ * You can restrict download to users by using the `allowedReferrer` method :
+ * 
+ * @code
+ * $dl = new FileDownload( 'myarchive.zip' );
+ * $dl->addAllowedReferrer( 'http://mydomain.com/download-section' );
+ * @endcode
+ * 
+ * To display a message for an unallowed referrer, you need to catch the NoPermissionsException from the 
+ * `output()` method.
+ * 
+ * @code
+ * try{
+ *     $dl = new FileDownload( 'myarchive.zip' );
+ *     $dl->addAllowedReferrer( 'http://mydomain.com/download-section' );
+ *     $dl->output();
+ * } catch ( NoPermissionsException $e ){
+ *     echo 'You are not allowed to download this file';
+ * }
+ * @endcode
+ * 
+ * Another exception to look for is the InvalidArgumentTypeException in the output() method, which is thrown
+ * when the file-type doesn't match the available extensions.
+ * 
+ * @code
+ * $dl = new FileDownload( 'myarchive.abc' );   
+ * try{
+ *     $dl->output();
+ * } catch ( InvalidArgumentTypeException $e ){
+ *     echo $this->debug->exception($e);
+ * }
+ * @endcode
+ * 
+ */
 class FileDownload{
 	
 	private
-		/** Allowed referrers to download this file
+		/** 
+		 * @var $allowed_referrers 
+		 * array : Allowed referrers to download this file
 		 */
 		$allowed_referrers = array(),
 		
-		/** The name of the file to be displayed when downloading
+		/** 
+		 * @var $file_name 
+		 * string : The name of the file to be displayed when downloading
 		 */
 		$file_name = null,
 		
-		/** Full path to the file to be downloaded
+		/** 
+		 * @var $file
+		 * string : Full path to the file to be downloaded
 		 */
 		$file = null;
 		
 	public
-		/** Allowed extensions and their mime type
+		/**
+		 * @var $extensions
+		 * array : Allowed extensions and their mime type
 		 */
 		$extensions;
 	
@@ -109,7 +183,7 @@ class FileDownload{
 	
 	/** Set the name of the file to display for the download
 	 * 
-	 * @param string file_name : the file name to set
+	 * @param string $file_name : the file name to set
 	 * 
 	 * @return FileDownload    : current object
 	 */

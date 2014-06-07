@@ -8,13 +8,20 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/**
- * @license   : http://dispersion.inevy.com/license
- * @namespace : optional
- * @file      : libraries/optional/flash.class.php
- * @version   : 1.0 
+
+ /**
+ * @version 1.2
+ * @author DinuSV
  */
 
+/** 
+ * @ingroup libraries
+ * @brief Maintains a users state while they browse the application.
+ * 
+ * Stores session information for each user as serialized data. Sessions will likely run
+ * globally with each page load, so the session class mut either be initialized in each
+ * controller, or it can be auto-loaded by the application.
+ */
 class Flash{
 	
 	/** Constructor

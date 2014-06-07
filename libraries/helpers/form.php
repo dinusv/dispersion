@@ -8,14 +8,15 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/**
- * @license   : http://dispersion.inevy.com/license
- * @namespace : Helpers
- * @file      : libraries/helpers/form.class.php
- * @parent    : Tag
- * @version   : 1.0
+ /**
+ * @version 1.2
+ * @author DinuSV
  */
 
+/** 
+ * @ingroup helpers
+ * @brief Html form wrapper.
+ */
 class Form extends Tag{
 	
 	/** Constructor

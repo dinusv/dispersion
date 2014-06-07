@@ -8,14 +8,15 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/** Thrown when trying to access an index of an array that is not set.
- *
- * @license   : http://dispersion.inevy.com/license
- * @namespace : exceptions
- * @file      : libraries/exceptions/indexoutofboundsexception.class.php
- * @version   : 1.0
+/**
+ * @version 1.1
+ * @author DinuSV
  */
- 
+
+/** 
+ * @ingroup exceptions
+ * @brief Thrown when trying to access an index of an array that is not set.
+ */
 class IndexOutOfBoundsException extends Exception{
 	
 }

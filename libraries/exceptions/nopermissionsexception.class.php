@@ -8,14 +8,15 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/** Thrown when an action is requested that php does not have permissions for.
- *
- * @license   : http://dispersion.inevy.com/license
- * @namespace : exceptions
- * @file      : libraries/exceptions/nopermissionexception.class.php
- * @version   : 1.0
+/**
+ * @version 1.1
+ * @author DinuSV
  */
- 
-class NoPermissionException extends Exception{
+
+/** 
+ * @ingroup exceptions
+ * @brief Thrown when a system action is requested that php does not have permissions for.
+ */
+class NoPermissionsException extends Exception{
 	
 }

@@ -8,19 +8,18 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/** Provides a paypal interface wrapper
- * 
- * @license   : http://dispersion.inevy.com/license
- * @namespace : optional
- * @file      : libraries/optional/paypal.class.php
- * @requires  : libraries/helpers/form.php, libraries/helpers/tag.php
- * @version   : 1.0
- * 
+ /**
+ * @version 1.2
+ * @author DinuSV
+ */
+
+/** 
+ * @ingroup libraries
+ * @brief Provides a paypal interface wrapper
  * 
  * Usage
  * 
- * @example
- * <code>
+ * @code
  * // Paypal form usage
  * 
  * $paypal = new PayPal();
@@ -30,11 +29,10 @@
  * $paypal->redirectAfter( 0 );
  * $paypal->formIpn('myurl');
  * $paypal->formOutput();
- * </code>
+ * @endcode
  * 
  * 
- * @example
- * <code>
+ * @code
  * // Paypal ipn usage
  * 
  * $paypal = new PayPal();
@@ -47,32 +45,31 @@
  * } catch( Exception $e ){
  * 	// Invalid IPN
  * }
- * </code>
+ * @endcode
  */
-
 class PayPal{
 	
-	/** Paypal sandbox post link
-	 * 
-	 * @var string
+	/** 
+	 * @var SANDBOX
+	 * string : Paypal sandbox post link
 	 */
 	const SANDBOX = 'https://sandbox.paypal.com/cgi-bin/webscr';
 	
-	/** Paypal active post link
-	 * 
-	 * @var string
+	/** 
+	 * @var ACTIVE
+	 * string : Paypal active post link
 	 */
 	const ACTIVE  = 'https://www.paypal.com/cgi-bin/websrc';
 	
-	/** Paypal url
-	 * 
-	 * @var string
+	/** 
+	 * @var PPURL
+	 * string : Paypal url
 	 */
 	const PPURL   = 'www.paypal.com';
 	
-	/** Paypal developer url
-	 * 
-	 * @var string
+	/** 
+	 * @var PPSBURL
+	 * string : Paypal developer url
 	 */
 	const PPSBURL = 'sandbox.paypal.com';
 		
@@ -82,29 +79,28 @@ class PayPal{
 	 * Paypal Form Fields
 	 * ----------------------------------------- */
 		
-		
-		/** Fields that will be posted to paypal
-		 * 
-		 * @var string
+		/** 
+		 * @var $form_fields
+		 * array : Fields that will be posted to paypal
 		 */
 		$form_fields       = array(),
 		
-		/** Custom submit button
-		 * 
-		 * @var string
+		/** 
+		 * @var $form_submit_image
+		 * string : Custom submit button
 		 */
 		$form_submit_image = null,
 		
-		/** Paypal form action, can be either the paypal sandbox url or the original one
-		 * 
-		 * @var string
+		/** 
+		 * @var $form_action
+		 * string : Paypal form action, can be either the paypal sandbox url or the original one
 		 */
 		$form_action       = '',
 		
-		/** Submit the form using javascript after a set number of seconds. Set this to 0 to
+		/** 
+		 * @var $form_redirect
+		 * string : Submit the form using javascript after a set number of seconds. Set this to 0 to
 		 * disable autosubmitting
-		 * 
-		 * @var string
 		 */
 		$form_redirect     = 10,
 		
@@ -112,15 +108,15 @@ class PayPal{
 	 * Paypal Ipn Fields
 	 * ----------------------------------------- */
 	
-		/** The posted data received by the ipn request
-		 * 
-		 * @var string
+		/** 
+		 * @var $ipn_posted_data
+		 * string : The posted data received by the ipn request
 		 */
 		$ipn_posted_data,
 		
-		/** Payment data processed from the posted data received by ipn
-		 * 
-		 * @var string
+		/** 
+		 * @var $ipn_payment_data
+		 * string : Payment data processed from the posted data received by ipn
 		 */
 		$ipn_payment_data  = array();
 	

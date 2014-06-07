@@ -8,31 +8,34 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/**
- * @license   : http://dispersion.inevy.com/license
- * @namespace : optional
- * @file      : libraries/helpers/tag.php
- * @version   : 1.0 
+
+ /**
+ * @version 1.2
+ * @author DinuSV
  */
 
+/** 
+ * @ingroup helpers
+ * @brief Html tag.
+ */
 class Tag{
 	
 	private
-		/** Tag type
-		 *
-		 * @var string
+		/** 
+		 * @var $type
+		 * string : Tag type
 		 */
 		$type,
 		
-		/** Tag Attributes
-		 *
-		 * @var array
+		/** 
+		 * @var $attributes
+		 * array : Tag Attributes
 		 */
 		$attributes = array(),
 		
-		/** Tag content
-		 *
-		 * @var array
+		/** 
+		 * @var $content
+		 * array : Tag content
 		 */
 		$content = array();
 	
@@ -185,7 +188,7 @@ class Tag{
 	
 	/** Get this object and it's html string representation
 	 *
-	 * @param integer indent : [optional] in case you need to use indentation, set this to 0,
+	 * @param int $indent : [optional] in case you need to use indentation, set this to 0,
 	 *      or to the number of tabs you want to start indenting at
 	 *
 	 * @return string

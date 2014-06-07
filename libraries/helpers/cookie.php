@@ -8,58 +8,60 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/**
- * @license   : http://dispersion.inevy.com/license
- * @namespace : helpers
- * @file      : libraries/helpers/cookie.php
- * @version   : 1.0
+ /**
+ * @version 1.2
+ * @author DinuSV
  */
- 
+
+/** 
+ * @ingroup helpers
+ * @brief User cookie wrapper.
+ */
 class Cookie{
 	
 	public
-		/** Name of the cookie
-		 * 
-		 * @var string
+		/** 
+		 * @var $name
+		 * string : Name of the cookie
 		 */
 		$name,
 		
-		/** The value of the cookie
-		 * 
-		 * @var string
+		/** 
+		 * @var $value
+		 * string : Value of the cookie
 		 */
 		$value,
 		
-		/** The time the cookie expires. This is a UNIX timestamp.
-		 * 
-		 * @var int
+		/** 
+		 * @var $expire
+		 * int : Time the cookie expires in ( UNIX timestamp )
 		 */
 		$expire,
 		
-		/** The path on the server in which the cookie will be available on.
+		/** 
+		 * @var $path
+		 * string : The path on the server in which the cookie will be available on.
 		 * Set to '/' to make it available through the entire domain.
-		 * 
-		 * @var string
 		 */
 		$path,
 		
-		/** The domain that the cookie will be available to.
-		 * 
-		 * @var string
+		/** 
+		 * @var $domain
+		 * string : The domain that the cookie will be available to.
 		 */
 		$domain,
 		
-		/** Transmit the cookie only if the connection is a secure HTTPS connection from the client.
+		/** 
+		 * @var $secure
+		 * bool : Transmit the cookie only if the connection is a secure HTTPS connection from the client.
 		 * When set to true, the cookie will be set only if a secure connection exists.
-		 * 
-		 * @var boolean
 		 */
 		$secure,
 		
-		/** The cookie will only be made accessible through the HTTP protocol. The cookie cannot be
+		/** 
+		 * @var $httponly
+		 * bool : The cookie will only be made accessible through the HTTP protocol. The cookie cannot be
 		 * accessed through scripting languages, like javascript.
-		 * 
-		 * @var boolean
 		 */
 		$httponly;
 	

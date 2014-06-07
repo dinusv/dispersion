@@ -8,45 +8,51 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/** Main class
- * 
- * @license     : http://dispersion.inevy.com/license
- * @namespace   : core
- * @file        : libraries/dispersion.class.php
- * @version     : 1.0
+/**
+ * @version 1.1
+ * @author DinuSV
  */
 
+ /** 
+  * @ingroup core
+  * @brief Base for core classes and libraries within the framework
+  *  
+  * Extending this class offers access to the data model, debug object, all autoloaded
+  * libraries and the ability to manipulate views. Extension should mainly be done
+  * by custom libraries that require this access. Internally, the framework extends this
+  * class for data accessors, some libraries and core components.
+  */
 class Dispersion{
 	
 	protected static
-		/** Model object to be initialised by inheriting classes
-		 * 
-		 * @var Model
+		/** 
+		 * @var $model_ob
+		 * Model : object to be initialised by inheriting classes
 		 */
 		$model_ob = null,
 		
-		/** Debug object to be initialised by inheriting classes
-		 * 
-		 * @var Debug
+		/**
+		 * @var $debug_ob
+		 * Debug : Debug object to be initialised by inheriting classes 
 		 */
 		$debug_ob = null,
 		
-		/** Stores the variables that will be made available to the view files
-		 * 
-		 * @var array
+		/**
+		 * @var $_variables
+		 * array : Stores the variables that will be made available to the view files
 		 */
 		$_variables = array(),
 		
-		/** Stores the view files
-		 * 
-		 * @var array
+		/** 
+		 * @var $_content
+		 * array : Stores the view files
 		 */
 		$_content = array();
 	
 	private static
-		/** Keeps track of the number of view files added
-		 * 
-		 * @var integer
+		/** 
+		 * @var $_content_count
+		 * int : Keeps track of the number of view files added
 		 */
 		$_content_count = 0;
 	
@@ -54,15 +60,15 @@ class Dispersion{
 		$models = array();
 	
 	protected
-		/** Current model
-		 * 
-		 * @var Model
+		/**
+		 * @var $model
+		 * Model : Current model
 		 */
 		$model,
 		
-		/** Current debug object
-		 * 
-		 * @var Debug
+		/** 
+		 * @var $debug
+		 * Debug : Current debug object
 		 */
 		$debug;
 	
@@ -122,8 +128,8 @@ class Dispersion{
 	
 	/** Require a configuration file. Used by libraries which require configuration.
 	 * 
-	 * @param string file_name : the name of the file
-	 * @param boolean required : true if the file is needed, false if the file is optional
+	 * @param string $file_name : the name of the file
+	 * @param boolean $required : true if the file is needed, false if the file is optional
 	 * 
 	 * @throws FileNotFoundException
 	 * 

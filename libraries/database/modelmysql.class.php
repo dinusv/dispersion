@@ -8,36 +8,103 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/** Provides main queries used for working with the database
- * 
- * @license   : http://dispersion.inevy.com/license
- * @namespace : database
- * @file      : libraries/database/modelmysql.class.php
- * @extends   : DataBaseMySql
- * @version   : 1.0 
+/**
+ * @version 1.1
+ * @author DinuSV
  */
 
+/** 
+ * @ingroup database
+ * @brief MySql query abstractions. Base for all database models.
+ * 
+ * ## Simple Queries
+ * 
+ * Query with one result
+ * 
+ * @code
+ * $result = $this->model->query( 'SELECT * FROM `my_table`' );
+ * $selectedRows = $this->model->numRows( $result );
+ * @endcode
+ * 
+ * Execute query and get number of affected rows.
+ * 
+ * @code
+ * $this->model->execute( 'UPDATE `my_table` SET `key`=1 ');
+ * 
+ * // Get number of affectd rows
+ * $affectedRows = $this->model->affectedRows();
+ * @endcode
+ * 
+ * Query with one result
+ * 
+ * @code
+ * $row = $this->model->queryOneRow( 'SELECT * FROM `my_table` WHERE id=1' );
+ * @endcode
+ * 
+ * ## Selection Methods
+ * 
+ * The table used with the following methods is by default the same as the 
+ * name of the model, or can be set using the Model::setTable() method.
+ * 
+ * Selecting, or executing simple selection queries can be done using the
+ * `select()` method :
+ * 
+ * @code 
+ * // SELECT * FROM `current_table`
+ * $this->model->select();
+ * 
+ * // SELECT * FROM `current_table` WHERE id=5 AND otherid=6
+ * $this->model->select( array( 'id' => 5, 'otherid' => 6 ) ); // OR
+ * $this->model->select( 'WHERE id=5 AND otherid=6' );
+ *  
+ * // SELECT * FROM `current_table` ORDER BY id DESC
+ * $this->model->select( 'ORDER BY id desc' );
+ * 
+ * // SELECT id, otherid FROM `current_table`
+ * $this->model->select( null, 'id, otherid' ); // OR
+ * $this->model->select( null, array( 'id', 'otherid' ) );
+ * @endcode
+ * 
+ * Advanced selection can be done by using Model::selectRows
+ * 
+ * Selecting a single row can be done either by a given primary key, or by a where clause, depending
+ * on the type of the `$condition`. In case `$condition` is not an array, the primary key is obtained
+ * automatically and compared with the given parameter. Otherwise the where clause is used. 
+ * 
+ * A table where the primary key is `id` will create the following queries :
+ * @code
+ * // SELECT * FROM `current_table` WHERE id=5 LIMIT 1
+ * $row = $this->model->selectRow(5); // OR
+ * $row = $this->model->selectRow( array( 'id' => 5 ) );
+ *  
+ * // SELECT * FROM `current_table` WHERE id=5 AND otherid=6 LIMIT 1
+ * $row = $this->model->selectRow( array( 'id' => 5, 'otherid' => 5 ) );
+ * 
+ * // SELECT * FROM `current_table` WHERE id>1 AND otherid=6 LIMIT 1
+ * $row = $this->model->selectRow( array( array( 'id', '>', 1 ), 'otherid' => 6 );
+ * @endcode
+ * 
+ */
 class Model extends DataBaseMySql {
 	
-	
 	protected
-		/** Holds the primary key of the table, used by functions that request or change one row. Can be
-		 *  set, or fetched by getPrimaryKey() method.
-		 * 
-		 * @var string
+		/** 
+		 * @var $_primary_key
+		 * string : Holds the primary key of the table, used by functions that request or change one row. Can be
+		 * set, or fetched by getPrimaryKey() method.
 		 */ 
 		$_primary_key = null;
 	
 	public
-		/** Name of the table the model will be working with
-		 * 
-		 * @var string
+		/** 
+		 * @var $table
+		 * string : Name of the table the model will be working with
 		 */ 
 		$table;
 	
 	/** Constructor 
 	 * 
-	 * @param array $db : db connection information
+	 * @param $db_connection array : db connection information
 	 */
 	public function Model( $db_connection ) {
 		parent::__construct( $db_connection );
@@ -51,7 +118,7 @@ class Model extends DataBaseMySql {
 	 
 	/** Set the default table
 	 * 
-	 * @param string $table : The table name
+	 * @param $table string : The table name
 	 */
 	public function setTable( $table ){
 		$this->table = $table;
@@ -80,7 +147,7 @@ class Model extends DataBaseMySql {
 	
 	/** Checks if values is string or numeric, and adds quotes if necessary
 	 * 
-	 * @return string : the value in quotes or as it is, escaped
+	 * @return $value string : the value in quotes or as it is, escaped
 	 */ 
 	private function toQuery( $value ){
 		if ( !is_numeric($value) ) return "'" . mysql_real_escape_string($value) . "'";
@@ -89,9 +156,9 @@ class Model extends DataBaseMySql {
 	 
 	/** Generate a query where clause
 	 * 
-	 * @param string/array $val        : array of values, or a string containing the query
-	 * @param string $logical_operator : the default operator to be used between comparisons
-	 * @param string $compare_sign     : the default sign used for comparisons
+	 * @param $val string/array        : array of values, or a string containing the query
+	 * @param $logical_operator string : the default operator to be used between comparisons
+	 * @param $compare_sign string     : the default sign used for comparisons
 	 * 
 	 * @return string : the query where clause generated
 	 */
@@ -127,9 +194,9 @@ class Model extends DataBaseMySql {
 	
 	/** Generate a query where_in clause
 	 * 
-	 * @param string $value   : the value to look for
-	 * @param array $invalues : the values to look in
-	 * @param boolean $not    : if set to true, the value will not be contained
+	 * @param $value string   : the value to look for
+	 * @param $invalues array : the values to look in
+	 * @param $not boolean    : if set to true, the value will not be contained
 	 * 
 	 * @return string : the query generated as a string
 	 */
@@ -149,7 +216,7 @@ class Model extends DataBaseMySql {
 	
 	/** Generate a query string with comma separated values
 	 * 
-	 * @param array/string $values
+	 * @param $values array/string 
 	 * 
 	 * @return string : the comma separated values as string
 	 */
@@ -167,7 +234,7 @@ class Model extends DataBaseMySql {
 	
 	/** Generate a query string with comma separated values to be set
 	 * 
-	 * @param array/string $values : if array, the values must have keys to match upon
+	 * @param $values array/string : if array, the values must have keys to match upon
 	 * 
 	 * @return string : the comma separated values
 	 */
@@ -188,8 +255,8 @@ class Model extends DataBaseMySql {
 	
 	/** Quick select
 	 * 
-	 * @param string/array $conditions : passed to the 'where' method if given
-	 * @param string/array $values     : passed to the 'values' method if given
+	 * @param $conditions string/array : passed to the 'where' method if given
+	 * @param $values string/array     : passed to the 'values' method if given
 	 * 
 	 * @return resource                : MySql resource
 	 */
@@ -201,8 +268,8 @@ class Model extends DataBaseMySql {
 	
 	/** Select a row based on a where clause or a primary key
 	 * 
-	 * @param string/array $value : if array, it will pe passed to the 'where' method, otherwise
-	 *                              it will be matched with the primary key of the table
+	 * @param $primary_value string/array : if array, it will pe passed to the 'where' method, otherwise
+	 * it will be matched with the primary key of the table
 	 * 
 	 * @return object             : the row selected
 	 */
@@ -250,7 +317,7 @@ class Model extends DataBaseMySql {
 		/* order direction */
 		if ( isset( $options['order_direction'] ) ) $query .= " " . $options['order_direction'] . "";
 		/* group by */
-		if ( isset( $options['group_by'] ) ) $query .= " group by `" . $options['group_by'] . "` ";
+		if ( isset( $options['group_by'] ) ) $query .= " group by " . $options['group_by'] . " ";
 		/* items count and start from */
 		if ( isset( $options['nr_items'] ) ) {
 			$query .= " LIMIT ";
@@ -266,7 +333,7 @@ class Model extends DataBaseMySql {
 	
 	/** Inserts given values
 	 * 
-	 * @param string/array $values : parsed by the 'setValues' method
+	 * @param $values string/array : parsed by the 'setValues' method
 	 */
 	public function insert( $values ) {
 		$values = $this->setValues($values);
@@ -279,8 +346,8 @@ class Model extends DataBaseMySql {
 	 
 	/** Update one row by its primary key
 	 * 
-	 * @param array/string $values          : parsed by the 'setValues' method
-	 * @param string/numeric $primary_value : the value of the primary key
+	 * @param $values array/string          : parsed by the 'setValues' method
+	 * @param $primary_value string/numeric : the value of the primary key
 	 */
 	public function updateRow( $values, $primary_value ){
 		if ( !is_numeric( $primary_value ) ) 
@@ -293,8 +360,8 @@ class Model extends DataBaseMySql {
 	
 	/** Update rows
 	 * 
-	 * @param array/string $values : parsed by the 'setValues' method
-	 * @param array/string $where  : parsed by the 'where' method
+	 * @param $values array/string : parsed by the 'setValues' method
+	 * @param $where array/string  : parsed by the 'where' method
 	 */
 	public function updateRows( $values, $where = "" ){
 		$values = $this->setValues($values);
@@ -308,7 +375,7 @@ class Model extends DataBaseMySql {
 	 
 	/** Delete row by its primary key
 	 * 
-	 * @param string/numeric $primary_value : value of the primary key
+	 * @param $primary_value string/numeric : value of the primary key
 	 */
 	public function deleteRow( $primary_value ){
 		if ( !is_numeric( $primary_value ) ) 
@@ -320,7 +387,7 @@ class Model extends DataBaseMySql {
 	
 	/** Deletes rows selected by a where clause
 	 * 
-	 * @param string/array $where : parsed by the 'where' method
+	 * @param $where string/array : parsed by the 'where' method
 	 */
 	public function deleteRows( $where = "" ){
 		$where = $this->where( $where );
@@ -329,8 +396,8 @@ class Model extends DataBaseMySql {
 	
 	/** Count the total rows in a table
 	 * 
-	 * @param array $options  : parsed by the 'selectRows' method
-	 * @param string $options : added at the end of the query
+	 * @param $options array  : parsed by the 'selectRows' method
+	 * @param $options string : added at the end of the query
 	 * 
 	 * @return numeric : number of rows
 	 */
@@ -340,7 +407,7 @@ class Model extends DataBaseMySql {
 			$result = $this->selectRows( $options );
 			$row = $this->nextObject($result);
 		} else $row = $this->queryOneRow( "select count(*) a from `" . $this->table . "` " . $options );
-		return $row->a;
+		return intval($row->a);
 	}
 	
 }

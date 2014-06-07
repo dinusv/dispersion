@@ -8,14 +8,19 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/** Holds and sets the configuration info
- * 
- * @license   : http://dispersion.inevy.com/license
- * @namespace : core
- * @file      : libraries/config.class.php
- * @version   : 1.0
+/**
+ * @version 1.1
+ * @author DinuSV
  */
 
+
+ /** 
+  * @ingroup core
+  * @brief Stores all configuration options of an application
+  * 
+  * Gets accessed through configuration files found within the "application" directory
+  * of each web-app.
+  */
 class Config{
 	
 	/* 
@@ -23,39 +28,39 @@ class Config{
 	 * ----------------------------------------- */
 	
 	private static
-		/** Database options
-		 * 
-		 * @var array
+		/** 
+		 * @var $db
+		 * array : Database options
 		 */
 		$db        = array(),
 		
-		/** Url of the website
-		 * 
-		 * @var string
+		/** 
+		 * @var $base_path
+		 * string : Url of the website
 		 */
 		$base_path = '',
 		
-		/** Custom urls
-		 * 
-		 * @var array
+		/** 
+		 * @var $url
+		 * array : Custom urls
 		 */
 		$url = array(),
 		
-		/** Autoload settings : defaultcontroller, libraries, viewfiles
-		 * 
-		 * @var array
+		/** 
+		 * @var $autoload
+		 *  array : Autoload settings : defaultcontroller, libraries, viewfiles
 		 */
 		$autoload  = array(),
 		
-		/** Model-controller mapping
-		 * 
-		 * @var array
+		/** 
+		 * @var $models
+		 * array : Model-controller mapping
 		 */
 		$models    = array(),
 		
-		/** Store routes from the config
-		 * 
-		 * @var array
+		/** 
+		 * @var $routes
+		 * array : Store routes from the config
 		 */
 		$routes    = array();
 	
@@ -64,17 +69,17 @@ class Config{
 	 * ----------------------------------------- */
 	 
 	private static
-		/** Settings on displaying errors : 
+		/** 
+		 * @var $errors
+		 * array : Settings on displaying errors : 
 		 *      stage, output_source_lines, log_exceptions, log_exceptions_file, page_not_found, page_not_found_param
-		 * 
-		 * @var array
 		 */
 		$errors       = array(),
 		
-		/** Settings to overwrite php ini : 
+		/** 
+		 * @var $phpini
+		 * array : Settings to overwrite php ini : 
 		 *      overwrite, log_errors, log_file
-		 * 
-		 * @var array
 		 */
 		$phpini       = array();
 	
@@ -83,16 +88,16 @@ class Config{
 	 * ----------------------------------------- */
 	
 	private static
-		/** Stores custom settings
-		 * 
-		 * @var array
+		/**
+		 * @var $custom
+		 * array : Stores custom settings
 		 */
 		$custom = array();
 	
 	private static
-		/** Singleton instance
-		 *
-		 * @var Config
+		/**
+		 * @var $instance
+		 * Config : Singleton instance
 		 */
 		$instance     = null;
 	
@@ -101,15 +106,15 @@ class Config{
 	 * ----------------------------------------- */
 	
 	private
-		/** Store routing
-		 * 
-		 * @var array
+		/**
+		 * @var $new_route
+		 * Store routing
 		 */
 		$new_route = array(),
 		
-		/** Size of the new_route field
-		 * 
-		 * @var integer
+		/**
+		 * @var $new_route_size
+		 * int : Size of the new_rout field
 		 */
 		$new_route_size = 0;
 	

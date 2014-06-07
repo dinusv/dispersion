@@ -8,71 +8,76 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/** Wraps methods for the view files
- * 
- * @license     : http://dispersion.inevy.com/license
- * @namespace   : core
- * @file        : libraries/template.class.php
- * @extends     : Dispersion
- * @version     : 1.0
+/**
+ * @version 1.1
+ * @author DinuSV
  */
 
+ /** 
+  * @ingroup core
+  * @brief Provides control over view files.
+  *  
+  * Contains all view files to be rendered. Stores default header and footer used throughout
+  * the site. Offers access to loaded libraries and models for view files. 
+  */
 class Template extends Dispersion{
 	
 	private
-		/** Stores the loaded libraries
-		 * 
-		 * @var array
+		/** 
+		 * @var $loaded_libs
+		 * array : Stores the loaded libraries
 		 */
 		$loaded_libs     = array(),
 		
-		/** Stores the locations to load the libs
-		 * 
-		 * @var array
+		/** 
+		 * @var $loaded_libs_loc
+		 * array : Stores the locations to load the libs
 		 */
 		$loaded_libs_loc = array(),
 		
-		/** Stores the number of view files added
-		 * 
-		 * @var integer
+		/**
+		 * @var $content_counter
+		 * int : Stores the number of view files added
 		 */
 		$content_counter = 0,
 		
-		/** Stores the location of the javascript files
-		 * 
-		 * @var string
+		/** 
+		 * @var $js_file_loc
+		 * string : Stores the location of the javascript files
 		 */
 		$js_file_loc     = BASEPATH,
 		
-		/** Stores the location of the css files
-		 * 
-		 * @var string
+		/** 
+		 * @var $css_file_loc
+		 * string : Stores the location of the css files
 		 */
 		$css_file_loc    = BASEPATH,
 		
-		/** Extension of the view files
-		 * 
-		 * @var string
+		/** 
+		 * @var $view_file_ext
+		 * string : Extension of the view files
 		 */
 		$view_file_ext   = '.php',
 		
-		/** Stores the location of the view files
-		 * 
-		 * @var string
+		/** 
+		 * @var $view_file_loc
+		 * string : Stores the location of the view files
 		 */
 		$view_file_loc   = '';
 	
 	private static
-		/** Singleton instance
-		 * 
-		 * @var Template
+		/** 
+		 * @var $instance
+		 * Template : Singleton instance
 		 */
 		$instance        = null;
 		
 	/** Singleton class
 	 * 
-	 * @param string $view_file_location : the full path to the view files
-	 * @param string $js_lib_location    : the full path to the js files
+	 * @param $modelob string  : model object
+	 * @param $debugob string  : the full path to the js files
+	 * @param $locations array : path to view files
+	 * @param $autoload array  : autoloaded files & libraries
 	 */
 	public static function getInstance( $modelob = null, $debugob = null, $locations = array(), $autoload = array() ){
 		if ( self::$instance === null ) {
@@ -87,7 +92,8 @@ class Template extends Dispersion{
 
 	/** Constructor
 	 * 
-	 * @see getInstance 
+	 * @param array $locations : path to view files
+	 * @param array $libraries : autoloaded libraries
 	 */
 	private function Template( $locations, $libraries ){
 		parent::__construct();
@@ -108,6 +114,9 @@ class Template extends Dispersion{
 	 * Library loaders
 	 * ----------------------------------------- */
 	
+	/**
+	 * @return : array of loaded libraries
+	 */
 	public function getLoadedLibraries(){
 		AutoLoad::setLocations( $this->loaded_libs_loc );
 		return $this->loaded_libs;
@@ -115,8 +124,8 @@ class Template extends Dispersion{
 	
 	/** Function used by controller to initialise the libraries
 	 * 
-	 * @param string $lib   : the library name
-	 * @param object $value : library object
+	 * @param $lib string   : the library name
+	 * @param $value object : library object
 	 */
 	public function initLib( $lib, $value ){
 		$this->$lib = $value;
@@ -128,10 +137,10 @@ class Template extends Dispersion{
 	
 	/** Insert a view file
 	 * 
-	 * @override
+	 * Overrides Dispersion::insertView($viewfile, $index = -1)
 	 * 
-	 * @param string $name   : name of the file
-	 * @param numeric $index : override required argument
+	 * @param string $viewfile : name of the file
+	 * @param numeric $index   : override required argument
 	 * 
 	 * @throws FileNotFoundException 
 	 */
@@ -167,7 +176,7 @@ class Template extends Dispersion{
 	
 	/** Set location for the css files
 	 * 
-	 * @param string $css_file_loc
+	 * @param $css_file_loc string
 	 */
 	public function setCssPath( $css_file_loc ){
 		$this->css_file_loc = $css_file_loc;
@@ -175,7 +184,7 @@ class Template extends Dispersion{
 	
 	/** Set location for the javascript files
 	 * 
-	 * @param string $js_file_loc
+	 * @param $js_file_loc string
 	 */
 	public function setJsPath( $js_file_loc ){
 		$this->js_file_loc = $js_file_loc;
@@ -183,7 +192,7 @@ class Template extends Dispersion{
 	
 	/** Print css file
 	 * 
-	 * @param string $name : css file name with relative path
+	 * @param $name string : css file name with relative path
 	 */
 	public function css( $name ) {
 		echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"" . $this->css_file_loc . $name . "\" />";
@@ -191,7 +200,7 @@ class Template extends Dispersion{
 	
 	/** Print js file
 	 * 
-	 * @param string $name : js file name with relative path
+	 * @param $name string : js file name with relative path
 	 */
 	public function js( $name ) {
 		echo "<script src=\"" . $this->js_file_loc . $name . "\"></script>";

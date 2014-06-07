@@ -8,25 +8,27 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/** Format to sql date or datetime
- * 
- * @license   : http://dispersion.inevy.com/license
- * @file      : libraries/helpers/sqldatetime.php
- * @parent    : PHP DateTime class
- * @version   : 1.0
+
+ /**
+ * @version 1.2
+ * @author DinuSV
  */
 
+/** 
+ * @ingroup helpers
+ * @brief Date and date-time to sql format conversion.
+ */
 class SqlDateTime extends DateTime{
 	
-	/** Date mysql format
-	 * 
-	 * @var string
+	/** 
+	 * @var DATEFORMAT
+	 * string : Date mysql format
 	 */
 	const DATEFORMAT = "Y-m-d";
 	
-	/** DateTime mysql format
-	 * 
-	 * @var string
+	/** 
+	 * @var DATETIMEFORMAT
+	 * string : DateTime mysql format
 	 */
 	const DATETIMEFORMAT = "Y-m-d H:i:s";
 	

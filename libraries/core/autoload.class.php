@@ -8,42 +8,47 @@
 | Copyright 2010-2011 (c) inevy                     |
 ** -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  */
 
-/** 
- * @license   : http://dispersion.inevy.com/license
- * @namespace : core
- * @file      : libraries/autoload.class.php
- * @version   : 1.0
+/**
+ * @version 1.1
+ * @author DinuSV
  */
 
+ /** 
+  * @ingroup core
+  * @brief Internal component handling automatic file inclusion when instantiating new classes.
+  * 
+  * This class is used mostly internally to configure php into automatically including helpers,
+  * libraries and exceptions when instantiated. On load time, it's usage consists in requiring
+  * controllers and modles. 
+  */
 class AutoLoad{
 	
-	private static
-		/** Singleton instance
-		 * 
-		 * @var Autoload
-		 */ 
-		$instance = null;
+	/** 
+	 * @var $instance
+	 * Autoload : Singleton instance
+	 */
+	private static $instance = null;
 	
 	private static
-		/** Locations to load the classes from
-		 * 
-		 * @var array
+		/** 
+		 * @var $locations 
+		 * array : Locations to load the classes from
 		 */
 		$locations = array(),
 		
-		/** Locations to load the exceptions from
-		 * 
-		 * @var array
+		/**
+		 * @var $exceptions
+		 * array : Locations to load the exceptions from
 		 */
 		$exceptions = array(),
 		
-		/** Extensions of the files loaded
-		 * 
-		 * @var array
+		/** 
+		 * @var $extensions
+		 * array : Extensions of the files loaded
 		 */
 		$extensions = array();
 	
-	/** Class must be singleton 
+	/** Singleton class
 	 * 
 	 * @return : instance of this class
 	 */
@@ -60,7 +65,7 @@ class AutoLoad{
 
 	/** Locations setter
 	 * 
-	 * @param array $locations : the locations to look for classes
+	 * @param $locations array : the locations to look for classes
 	 */
 	public static function setLocations( $locations ){
 		self::$locations = $locations;
@@ -68,7 +73,7 @@ class AutoLoad{
 	
 	/** Extensions setter
 	 * 
-	 * @param array $extensions : the extensions of the files the classes will be in
+	 * @param $extensions array : the extensions of the files the classes will be in
 	 */
 	public static function setExtensions( $extensions ){
 		self::$extensions = $extensions;
@@ -76,7 +81,7 @@ class AutoLoad{
 	
 	/** Exceptions setter
 	 * 
-	 * @param array $exceptions : the locations of the exceptions
+	 * @param $exceptions array : the locations of the exceptions
 	 */
 	public static function setExceptions( $exceptions ){
 		self::$exceptions = $exceptions;
@@ -84,7 +89,7 @@ class AutoLoad{
 	
 	/** Autoload class method
 	 * 
-	 * @param string $class : the name of the class to look for
+	 * @param $class string : the name of the class to look for
 	 */
 	private function load( $class ){
 		$count = 0;
